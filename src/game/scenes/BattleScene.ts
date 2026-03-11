@@ -81,9 +81,20 @@ export class BattleScene extends Phaser.Scene {
     private keyE!: Phaser.Input.Keyboard.Key;
     private keyF!: Phaser.Input.Keyboard.Key;
     private keyR!: Phaser.Input.Keyboard.Key;
+    private keyB!: Phaser.Input.Keyboard.Key;
+    private keyUp!: Phaser.Input.Keyboard.Key;
+    private keyDown!: Phaser.Input.Keyboard.Key;
+    private keyLeft!: Phaser.Input.Keyboard.Key;
+    private keyRight!: Phaser.Input.Keyboard.Key;
 
     private angleInput = '';
     private selectedElement = 'C';
+
+    // Block cursor
+    private buildMode = false;
+    private cursorGridX = 4; // grid column (0-11 for 400px / 32px)
+    private cursorGridY = 15; // grid row
+    private cursorBlink = 0;
 
     private gameOver = false;
     private winner = '';
@@ -145,6 +156,11 @@ export class BattleScene extends Phaser.Scene {
         this.keyE = this.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.E);
         this.keyF = this.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.F);
         this.keyR = this.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.R);
+        this.keyB = this.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.B);
+        this.keyUp = this.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.UP);
+        this.keyDown = this.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.DOWN);
+        this.keyLeft = this.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.LEFT);
+        this.keyRight = this.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.RIGHT);
 
         // Text input for angle
         this.input.keyboard!.on('keydown', (event: KeyboardEvent) => {
@@ -183,6 +199,31 @@ export class BattleScene extends Phaser.Scene {
         this.keyF.on('down', () => {
             if (this.gameOver) return;
             this.placeBlock();
+        });
+        this.keyB.on('down', () => {
+            if (this.gameOver) return;
+            this.buildMode = !this.buildMode;
+            if (this.buildMode) {
+                // Initialize cursor near player
+                this.cursorGridX = Math.floor((this.player.x + this.player.width / 2) / BLOCK_SIZE);
+                this.cursorGridY = Math.floor((this.player.y + this.player.height - BLOCK_SIZE) / BLOCK_SIZE);
+            }
+        });
+        this.keyUp.on('down', () => {
+            if (!this.buildMode || this.gameOver) return;
+            this.cursorGridY = Math.max(0, this.cursorGridY - 1);
+        });
+        this.keyDown.on('down', () => {
+            if (!this.buildMode || this.gameOver) return;
+            this.cursorGridY = Math.min(Math.floor((GAME_HEIGHT - 1) / BLOCK_SIZE), this.cursorGridY + 1);
+        });
+        this.keyLeft.on('down', () => {
+            if (!this.buildMode || this.gameOver) return;
+            this.cursorGridX = Math.max(0, this.cursorGridX - 1);
+        });
+        this.keyRight.on('down', () => {
+            if (!this.buildMode || this.gameOver) return;
+            this.cursorGridX = Math.min(Math.floor(400 / BLOCK_SIZE) - 1, this.cursorGridX + 1);
         });
 
         // Timer
@@ -238,7 +279,7 @@ export class BattleScene extends Phaser.Scene {
         this.uiTexts.set('inst1', this.add.text(22, GAME_HEIGHT - 82, 'WASD — Move / Jump / Crouch', instStyle).setDepth(100));
         this.uiTexts.set('inst2', this.add.text(22, GAME_HEIGHT - 68, '0-9 + ENTER — Set angle & Shoot', instStyle).setDepth(100));
         this.uiTexts.set('inst3', this.add.text(22, GAME_HEIGHT - 54, 'Q/E — Cycle element | F — Place block', instStyle).setDepth(100));
-        this.uiTexts.set('inst4', this.add.text(22, GAME_HEIGHT - 40, 'BACKSPACE — Clear angle', instStyle).setDepth(100));
+        this.uiTexts.set('inst4', this.add.text(22, GAME_HEIGHT - 40, 'B — Build mode | ↑↓←→ — Move cursor', instStyle).setDepth(100));
 
         // Element labels
         ELEMENT_KEYS.forEach((key, i) => {
@@ -302,6 +343,7 @@ export class BattleScene extends Phaser.Scene {
         this.drawProjectiles();
         this.drawParticles();
         this.drawTrajectoryPreview();
+        this.drawBlockCursor();
         this.updateUITexts();
     }
 
@@ -413,11 +455,22 @@ export class BattleScene extends Phaser.Scene {
     private placeBlock() {
         const elem = ELEMENTS[this.selectedElement];
         if (this.player.inventory[this.selectedElement] <= 0) return;
-        const bx = this.player.facingRight
-            ? Math.floor((this.player.x + this.player.width) / BLOCK_SIZE) * BLOCK_SIZE
-            : Math.floor((this.player.x - BLOCK_SIZE) / BLOCK_SIZE) * BLOCK_SIZE;
-        const by = Math.floor((this.player.y + this.player.height - BLOCK_SIZE) / BLOCK_SIZE) * BLOCK_SIZE;
+
+        let bx: number, by: number;
+        if (this.buildMode) {
+            // Use cursor position
+            bx = this.cursorGridX * BLOCK_SIZE;
+            by = this.cursorGridY * BLOCK_SIZE;
+        } else {
+            // Legacy: place in front of player
+            bx = this.player.facingRight
+                ? Math.floor((this.player.x + this.player.width) / BLOCK_SIZE) * BLOCK_SIZE
+                : Math.floor((this.player.x - BLOCK_SIZE) / BLOCK_SIZE) * BLOCK_SIZE;
+            by = Math.floor((this.player.y + this.player.height - BLOCK_SIZE) / BLOCK_SIZE) * BLOCK_SIZE;
+        }
+
         if (bx < 0 || bx > 400 - BLOCK_SIZE) return;
+        if (by < 0 || by > GAME_HEIGHT - BLOCK_SIZE) return;
         for (const b of this.blocks) { if (b.x === bx && b.y === by) return; }
         this.blocks.push({ x: bx, y: by, element: this.selectedElement, hp: elem.hp, maxHp: elem.hp, side: 'left' });
         this.player.inventory[this.selectedElement]--;
@@ -741,6 +794,38 @@ export class BattleScene extends Phaser.Scene {
         g.fillCircle(px, py, 4);
     }
 
+    // ─── Block Cursor Drawing ─────────────────────────────
+    private drawBlockCursor() {
+        if (!this.buildMode || this.gameOver) return;
+        const g = this.gfx;
+        const bx = this.cursorGridX * BLOCK_SIZE;
+        const by = this.cursorGridY * BLOCK_SIZE;
+        const elem = ELEMENTS[this.selectedElement];
+
+        // Pulsing animation
+        this.cursorBlink += 0.06;
+        const alpha = 0.3 + Math.sin(this.cursorBlink) * 0.2;
+
+        // Cursor fill
+        g.fillStyle(elem.color, alpha);
+        g.fillRect(bx, by, BLOCK_SIZE, BLOCK_SIZE);
+
+        // Cursor border (bright pulsing)
+        g.lineStyle(2, 0xffffff, 0.5 + Math.sin(this.cursorBlink) * 0.3);
+        g.strokeRect(bx, by, BLOCK_SIZE, BLOCK_SIZE);
+
+        // Crosshair lines
+        g.lineStyle(1, 0xffffff, 0.2);
+        g.lineBetween(bx + BLOCK_SIZE / 2, by, bx + BLOCK_SIZE / 2, by + BLOCK_SIZE);
+        g.lineBetween(bx, by + BLOCK_SIZE / 2, bx + BLOCK_SIZE, by + BLOCK_SIZE / 2);
+
+        // "BUILD MODE" indicator
+        g.fillStyle(0x000000, 0.7);
+        g.fillRect(GAME_WIDTH / 2 - 60, 92, 120, 22);
+        g.lineStyle(1, 0xffeb3b, 0.8);
+        g.strokeRect(GAME_WIDTH / 2 - 60, 92, 120, 22);
+    }
+
     // ─── UI Updates ─────────────────────────────────────────
     private updateUITexts() {
         const g = this.gfx;
@@ -798,6 +883,14 @@ export class BattleScene extends Phaser.Scene {
         ELEMENT_KEYS.forEach((key) => {
             this.uiTexts.get(`elemCount_${key}`)!.setText(`×${this.player.inventory[key]}`);
         });
+
+        // Build mode text (created once, shown/hidden)
+        if (!this.uiTexts.has('buildMode')) {
+            this.uiTexts.set('buildMode', this.add.text(GAME_WIDTH / 2, 103, 'BUILD MODE', {
+                fontFamily: '"Courier New", monospace', fontSize: '11px', fontStyle: 'bold', color: '#ffeb3b',
+            }).setOrigin(0.5).setDepth(100));
+        }
+        this.uiTexts.get('buildMode')!.setVisible(this.buildMode && !this.gameOver);
 
         // Game over overlay
         if (this.gameOver) {
