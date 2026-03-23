@@ -89,6 +89,7 @@ export class BattleScene extends Phaser.Scene {
 
     private angleInput = '';
     private selectedElement = 'C';
+    private selectedElementKeys: string[] = [...ELEMENT_KEYS];
 
     // Block cursor
     private buildMode = false;
@@ -110,6 +111,8 @@ export class BattleScene extends Phaser.Scene {
 
     // Phaser Graphics objects
     private gfx!: Phaser.GameObjects.Graphics;
+    private playerSprite!: Phaser.GameObjects.Sprite;
+    private aiSprite!: Phaser.GameObjects.Sprite;
     private uiTexts: Map<string, Phaser.GameObjects.Text> = new Map();
 
     public onGameOver?: (winner: string, playerHp: number, aiHp: number) => void;
@@ -118,9 +121,17 @@ export class BattleScene extends Phaser.Scene {
         super({ key: 'BattleScene' });
     }
 
-    init(data: { onGameOver?: (winner: string, playerHp: number, aiHp: number) => void }) {
+    init(data: { onGameOver?: (winner: string, playerHp: number, aiHp: number) => void; selectedElements?: string[] }) {
         if (data.onGameOver) {
             this.onGameOver = data.onGameOver;
+        }
+
+        if (data.selectedElements && data.selectedElements.length > 0) {
+            const filtered = data.selectedElements.filter((key) => Boolean(ELEMENTS[key]));
+            if (filtered.length > 0) {
+                this.selectedElementKeys = filtered;
+                this.selectedElement = filtered[0];
+            }
         }
     }
 
@@ -132,7 +143,7 @@ export class BattleScene extends Phaser.Scene {
         this.blocks = [];
         this.particles = [];
         this.angleInput = '';
-        this.selectedElement = 'C';
+        this.selectedElement = this.selectedElementKeys[0] ?? 'C';
         this.cameraShakeIntensity = 0;
         this.cameraShakeX = 0;
         this.cameraShakeY = 0;
@@ -146,6 +157,12 @@ export class BattleScene extends Phaser.Scene {
 
         // Graphics
         this.gfx = this.add.graphics();
+
+        // Character sprites (loaded in BootScene)
+        this.playerSprite = this.add.sprite(0, 0, 'scientist_idle_1').setDepth(30).setOrigin(0.5, 1);
+        this.aiSprite = this.add.sprite(0, 0, 'scientist_idle_1').setDepth(30).setOrigin(0.5, 1);
+        this.playerSprite.play('scientist_idle');
+        this.aiSprite.play('scientist_idle');
 
         // Input keys
         this.keyA = this.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.A);
@@ -188,13 +205,13 @@ export class BattleScene extends Phaser.Scene {
         // Element cycling (on just pressed)
         this.keyQ.on('down', () => {
             if (this.gameOver) return;
-            const idx = ELEMENT_KEYS.indexOf(this.selectedElement);
-            this.selectedElement = ELEMENT_KEYS[(idx - 1 + ELEMENT_KEYS.length) % ELEMENT_KEYS.length];
+            const idx = this.selectedElementKeys.indexOf(this.selectedElement);
+            this.selectedElement = this.selectedElementKeys[(idx - 1 + this.selectedElementKeys.length) % this.selectedElementKeys.length];
         });
         this.keyE.on('down', () => {
             if (this.gameOver) return;
-            const idx = ELEMENT_KEYS.indexOf(this.selectedElement);
-            this.selectedElement = ELEMENT_KEYS[(idx + 1) % ELEMENT_KEYS.length];
+            const idx = this.selectedElementKeys.indexOf(this.selectedElement);
+            this.selectedElement = this.selectedElementKeys[(idx + 1) % this.selectedElementKeys.length];
         });
         this.keyF.on('down', () => {
             if (this.gameOver) return;
@@ -243,12 +260,17 @@ export class BattleScene extends Phaser.Scene {
     }
 
     private createChar(x: number, y: number, side: 'left' | 'right'): CharacterState {
+        const inventory: Record<string, number> = {};
+        ELEMENT_KEYS.forEach((key) => {
+            inventory[key] = this.selectedElementKeys.includes(key) ? (STARTING_INVENTORY[key] ?? 3) : 0;
+        });
+
         return {
             x, y, velX: 0, velY: 0, width: 40, height: 60,
             health: MAX_HEALTH, onGround: false, crouching: false,
             facingRight: side === 'left', side,
             animFrame: 0, animTimer: 0,
-            inventory: { ...STARTING_INVENTORY },
+            inventory,
             aiTimer: 0, aiShootTimer: 0,
         };
     }
@@ -282,7 +304,7 @@ export class BattleScene extends Phaser.Scene {
         this.uiTexts.set('inst4', this.add.text(22, GAME_HEIGHT - 40, 'B — Build mode | ↑↓←→ — Move cursor', instStyle).setDepth(100));
 
         // Element labels
-        ELEMENT_KEYS.forEach((key, i) => {
+        this.selectedElementKeys.forEach((key, i) => {
             const elem = ELEMENTS[key];
             const ex = GAME_WIDTH - 275 + i * 65;
             const ey = GAME_HEIGHT - 55;
@@ -300,6 +322,9 @@ export class BattleScene extends Phaser.Scene {
         // Element panel title
         this.uiTexts.set('elemTitle', this.add.text(GAME_WIDTH - 275, GAME_HEIGHT - 73, 'ELEMENTS [Q/E cycle, F place]', {
             fontFamily: '"Courier New", monospace', fontSize: '9px', color: '#888888',
+        }).setDepth(100));
+        this.uiTexts.set('elemSelectedName', this.add.text(GAME_WIDTH - 275, GAME_HEIGHT - 84, '', {
+            fontFamily: '"Courier New", monospace', fontSize: '10px', fontStyle: 'bold', color: '#ffffff',
         }).setDepth(100));
 
         // Game over texts (hidden initially)
@@ -338,8 +363,8 @@ export class BattleScene extends Phaser.Scene {
             this.updateCameraShake();
         }
 
-        this.drawCharacter(this.player, true);
-        this.drawCharacter(this.ai, false);
+        this.syncCharacterSprite(this.player, this.playerSprite);
+        this.syncCharacterSprite(this.ai, this.aiSprite);
         this.drawProjectiles();
         this.drawParticles();
         this.drawTrajectoryPreview();
@@ -390,19 +415,54 @@ export class BattleScene extends Phaser.Scene {
         if (c.animTimer > 8) { c.animTimer = 0; c.animFrame = (c.animFrame + 1) % 4; }
     }
 
+    private syncCharacterSprite(c: CharacterState, sprite: Phaser.GameObjects.Sprite) {
+        const baseX = c.x + c.width / 2;
+        const baseY = c.y + c.height + 2;
+        const spriteScaleY = c.crouching ? 0.9 : 1;
+
+        sprite.setPosition(baseX, baseY);
+        sprite.setDisplaySize(100, 140 * spriteScaleY);
+        sprite.setFlipX(!c.facingRight);
+
+        const isIdle = c.onGround && Math.abs(c.velX) < 20;
+        if (isIdle) {
+            if (!sprite.anims.isPlaying || sprite.anims.currentAnim?.key !== 'scientist_idle') {
+                sprite.play('scientist_idle');
+            }
+        } else {
+            sprite.anims.stop();
+            sprite.setTexture('scientist_idle_1');
+        }
+    }
+
     // ─── Shooting ───────────────────────────────────────────
     private shootProjectile(c: CharacterState, angle: number, isPlayer: boolean) {
         const rad = (angle * Math.PI) / 180;
-        const dir = isPlayer ? 1 : -1;
+        const dir = c.facingRight ? 1 : -1;
+        const muzzle = this.getGunMuzzlePosition(c);
         this.projectiles.push({
-            x: c.x + (isPlayer ? c.width : 0),
-            y: c.y + c.height / 3,
+            x: muzzle.x,
+            y: muzzle.y,
             velX: Math.cos(rad) * PROJECTILE_SPEED * dir,
             velY: -Math.sin(rad) * PROJECTILE_SPEED,
             isPlayerProjectile: isPlayer,
             active: true,
             trail: [],
         });
+    }
+
+    private getGunMuzzlePosition(c: CharacterState) {
+        const spriteX = c.x + c.width / 2;
+        const spriteBaseY = c.y + c.height + 2;
+
+        // Tuned offsets to align projectile spawn with blaster tip.
+        const muzzleXOffset = c.facingRight ? 22 : -22;
+        const muzzleYOffset = c.crouching ? -66 : -78;
+
+        return {
+            x: spriteX + muzzleXOffset,
+            y: spriteBaseY + muzzleYOffset,
+        };
     }
 
     private updateProjectiles(dt: number) {
@@ -579,7 +639,8 @@ export class BattleScene extends Phaser.Scene {
                 for (const pr of preds) {
                     const px = Math.max(0, Math.min(360, pr.x));
                     const py = Math.max(100, Math.min(490, pr.y));
-                    const r = this.simShot(a.x, a.y + a.height / 3, ang, px, py, this.player.width, this.player.height);
+                    const aiMuzzle = this.getGunMuzzlePosition(a);
+                    const r = this.simShot(aiMuzzle.x, aiMuzzle.y, ang, px, py, this.player.width, this.player.height);
                     if (r.hit) {
                         const s = 1000 - r.frame;
                         if (s > bestScore) { bestScore = s; bestAngle = ang; foundHit = true; }
@@ -610,7 +671,8 @@ export class BattleScene extends Phaser.Scene {
         const rad = (angle * Math.PI) / 180;
         const step = 1 / 60;
         let x = sx, y = sy;
-        let vx = -Math.cos(rad) * PROJECTILE_SPEED * step;
+        const dir = this.ai.facingRight ? 1 : -1;
+        let vx = Math.cos(rad) * PROJECTILE_SPEED * step * dir;
         let vy = -Math.sin(rad) * PROJECTILE_SPEED * step;
         const g = GRAVITY * 0.5 * step * step;
         let best = Infinity, bf = -1;
@@ -769,11 +831,13 @@ export class BattleScene extends Phaser.Scene {
         if (isNaN(angle) || angle < 0 || angle > 90) return;
 
         const g = this.gfx;
-        const startX = this.player.x + this.player.width;
-        const startY = this.player.y + this.player.height / 3;
+        const muzzle = this.getGunMuzzlePosition(this.player);
+        const startX = muzzle.x;
+        const startY = muzzle.y;
         const rad = (angle * Math.PI) / 180;
+        const dir = this.player.facingRight ? 1 : -1;
         const step = 1 / 60;
-        let vx = Math.cos(rad) * PROJECTILE_SPEED * step;
+        let vx = Math.cos(rad) * PROJECTILE_SPEED * step * dir;
         let vy = -Math.sin(rad) * PROJECTILE_SPEED * step;
         const grav = GRAVITY * 0.5 * step * step;
 
@@ -853,10 +917,10 @@ export class BattleScene extends Phaser.Scene {
         g.fillStyle(0x000000, 0.6); g.fillRect(15, GAME_HEIGHT - 92, 280, 80);
 
         // Element panel bg
-        g.fillStyle(0x000000, 0.7); g.fillRect(GAME_WIDTH - 280, GAME_HEIGHT - 78, 270, 60);
+        g.fillStyle(0x000000, 0.7); g.fillRect(GAME_WIDTH - 280, GAME_HEIGHT - 90, 270, 72);
 
         // Element boxes
-        ELEMENT_KEYS.forEach((key, i) => {
+        this.selectedElementKeys.forEach((key, i) => {
             const elem = ELEMENTS[key];
             const ex = GAME_WIDTH - 275 + i * 65;
             const ey = GAME_HEIGHT - 55;
@@ -880,9 +944,12 @@ export class BattleScene extends Phaser.Scene {
         this.uiTexts.get('angleValue')!.setText(this.angleInput || '___');
 
         // Element counts
-        ELEMENT_KEYS.forEach((key) => {
+        this.selectedElementKeys.forEach((key) => {
             this.uiTexts.get(`elemCount_${key}`)!.setText(`×${this.player.inventory[key]}`);
         });
+
+        const selectedElem = ELEMENTS[this.selectedElement];
+        this.uiTexts.get('elemSelectedName')!.setText(`Selected: ${selectedElem.name} (${selectedElem.symbol})`);
 
         // Build mode text (created once, shown/hidden)
         if (!this.uiTexts.has('buildMode')) {

@@ -1,0 +1,1132 @@
+[
+  {
+    "atomicNumber": 1,
+    "symbol": "H",
+    "name": "Hydrogen",
+    "atomicMass": "1.00794(4)",
+    "electronicConfiguration": "1s1",
+    "standardState": "gas",
+    "groupBlock": "nonmetal"
+  },
+  {
+    "atomicNumber": 2,
+    "symbol": "He",
+    "name": "Helium",
+    "atomicMass": "4.002602(2)",
+    "electronicConfiguration": "1s2",
+    "standardState": "gas",
+    "groupBlock": "noble gas"
+  },
+  {
+    "atomicNumber": 3,
+    "symbol": "Li",
+    "name": "Lithium",
+    "atomicMass": "6.941(2)",
+    "electronicConfiguration": "[He] 2s1",
+    "standardState": "solid",
+    "groupBlock": "alkali metal"
+  },
+  {
+    "atomicNumber": 4,
+    "symbol": "Be",
+    "name": "Beryllium",
+    "atomicMass": "9.012182(3)",
+    "electronicConfiguration": "[He] 2s2",
+    "standardState": "solid",
+    "groupBlock": "alkaline earth metal"
+  },
+  {
+    "atomicNumber": 5,
+    "symbol": "B",
+    "name": "Boron",
+    "atomicMass": "10.811(7)",
+    "electronicConfiguration": "[He] 2s2 2p1",
+    "standardState": "solid",
+    "groupBlock": "metalloid"
+  },
+  {
+    "atomicNumber": 6,
+    "symbol": "C",
+    "name": "Carbon",
+    "atomicMass": "12.0107(8)",
+    "electronicConfiguration": "[He] 2s2 2p2",
+    "standardState": "solid",
+    "groupBlock": "nonmetal"
+  },
+  {
+    "atomicNumber": 7,
+    "symbol": "N",
+    "name": "Nitrogen",
+    "atomicMass": "14.0067(2)",
+    "electronicConfiguration": "[He] 2s2 2p3",
+    "standardState": "gas",
+    "groupBlock": "nonmetal"
+  },
+  {
+    "atomicNumber": 8,
+    "symbol": "O",
+    "name": "Oxygen",
+    "atomicMass": "15.9994(3)",
+    "electronicConfiguration": "[He] 2s2 2p4",
+    "standardState": "gas",
+    "groupBlock": "nonmetal"
+  },
+  {
+    "atomicNumber": 9,
+    "symbol": "F",
+    "name": "Fluorine",
+    "atomicMass": "18.9984032(5)",
+    "electronicConfiguration": "[He] 2s2 2p5",
+    "standardState": "gas",
+    "groupBlock": "halogen"
+  },
+  {
+    "atomicNumber": 10,
+    "symbol": "Ne",
+    "name": "Neon",
+    "atomicMass": "20.1797(6)",
+    "electronicConfiguration": "[He] 2s2 2p6",
+    "standardState": "gas",
+    "groupBlock": "noble gas"
+  },
+  {
+    "atomicNumber": 11,
+    "symbol": "Na",
+    "name": "Sodium",
+    "atomicMass": "22.98976928(2)",
+    "electronicConfiguration": "[Ne] 3s1",
+    "standardState": "solid",
+    "groupBlock": "alkali metal"
+  },
+  {
+    "atomicNumber": 12,
+    "symbol": "Mg",
+    "name": "Magnesium",
+    "atomicMass": "24.3050(6)",
+    "electronicConfiguration": "[Ne] 3s2",
+    "standardState": "solid",
+    "groupBlock": "alkaline earth metal"
+  },
+  {
+    "atomicNumber": 13,
+    "symbol": "Al",
+    "name": "Aluminum",
+    "atomicMass": "26.9815386(8)",
+    "electronicConfiguration": "[Ne] 3s2 3p1",
+    "standardState": "solid",
+    "groupBlock": "metal"
+  },
+  {
+    "atomicNumber": 14,
+    "symbol": "Si",
+    "name": "Silicon",
+    "atomicMass": "28.0855(3)",
+    "electronicConfiguration": "[Ne] 3s2 3p2",
+    "standardState": "solid",
+    "groupBlock": "metalloid"
+  },
+  {
+    "atomicNumber": 15,
+    "symbol": "P",
+    "name": "Phosphorus",
+    "atomicMass": "30.973762(2)",
+    "electronicConfiguration": "[Ne] 3s2 3p3",
+    "standardState": "solid",
+    "groupBlock": "nonmetal"
+  },
+  {
+    "atomicNumber": 16,
+    "symbol": "S",
+    "name": "Sulfur",
+    "atomicMass": "32.065(5)",
+    "electronicConfiguration": "[Ne] 3s2 3p4",
+    "standardState": "solid",
+    "groupBlock": "nonmetal"
+  },
+  {
+    "atomicNumber": 17,
+    "symbol": "Cl",
+    "name": "Chlorine",
+    "atomicMass": "35.453(2)",
+    "electronicConfiguration": "[Ne] 3s2 3p5",
+    "standardState": "gas",
+    "groupBlock": "halogen"
+  },
+  {
+    "atomicNumber": 18,
+    "symbol": "Ar",
+    "name": "Argon",
+    "atomicMass": "39.948(1)",
+    "electronicConfiguration": "[Ne] 3s2 3p6",
+    "standardState": "gas",
+    "groupBlock": "noble gas"
+  },
+  {
+    "atomicNumber": 19,
+    "symbol": "K",
+    "name": "Potassium",
+    "atomicMass": "39.0983(1)",
+    "electronicConfiguration": "[Ar] 4s1",
+    "standardState": "solid",
+    "groupBlock": "alkali metal"
+  },
+  {
+    "atomicNumber": 20,
+    "symbol": "Ca",
+    "name": "Calcium",
+    "atomicMass": "40.078(4)",
+    "electronicConfiguration": "[Ar] 4s2",
+    "standardState": "solid",
+    "groupBlock": "alkaline earth metal"
+  },
+  {
+    "atomicNumber": 21,
+    "symbol": "Sc",
+    "name": "Scandium",
+    "atomicMass": "44.955912(6)",
+    "electronicConfiguration": "[Ar] 3d1 4s2",
+    "standardState": "solid",
+    "groupBlock": "transition metal"
+  },
+  {
+    "atomicNumber": 22,
+    "symbol": "Ti",
+    "name": "Titanium",
+    "atomicMass": "47.867(1)",
+    "electronicConfiguration": "[Ar] 3d2 4s2",
+    "standardState": "solid",
+    "groupBlock": "transition metal"
+  },
+  {
+    "atomicNumber": 23,
+    "symbol": "V",
+    "name": "Vanadium",
+    "atomicMass": "50.9415(1)",
+    "electronicConfiguration": "[Ar] 3d3 4s2",
+    "standardState": "solid",
+    "groupBlock": "transition metal"
+  },
+  {
+    "atomicNumber": 24,
+    "symbol": "Cr",
+    "name": "Chromium",
+    "atomicMass": "51.9961(6)",
+    "electronicConfiguration": "[Ar] 3d5 4s1",
+    "standardState": "solid",
+    "groupBlock": "transition metal"
+  },
+  {
+    "atomicNumber": 25,
+    "symbol": "Mn",
+    "name": "Manganese",
+    "atomicMass": "54.938045(5)",
+    "electronicConfiguration": "[Ar] 3d5 4s2",
+    "standardState": "solid",
+    "groupBlock": "transition metal"
+  },
+  {
+    "atomicNumber": 26,
+    "symbol": "Fe",
+    "name": "Iron",
+    "atomicMass": "55.845(2)",
+    "electronicConfiguration": "[Ar] 3d6 4s2",
+    "standardState": "solid",
+    "groupBlock": "transition metal"
+  },
+  {
+    "atomicNumber": 27,
+    "symbol": "Co",
+    "name": "Cobalt",
+    "atomicMass": "58.933195(5)",
+    "electronicConfiguration": "[Ar] 3d7 4s2",
+    "standardState": "solid",
+    "groupBlock": "transition metal"
+  },
+  {
+    "atomicNumber": 28,
+    "symbol": "Ni",
+    "name": "Nickel",
+    "atomicMass": "58.6934(4)",
+    "electronicConfiguration": "[Ar] 3d8 4s2",
+    "standardState": "solid",
+    "groupBlock": "transition metal"
+  },
+  {
+    "atomicNumber": 29,
+    "symbol": "Cu",
+    "name": "Copper",
+    "atomicMass": "63.546(3)",
+    "electronicConfiguration": "[Ar] 3d10 4s1",
+    "standardState": "solid",
+    "groupBlock": "transition metal"
+  },
+  {
+    "atomicNumber": 30,
+    "symbol": "Zn",
+    "name": "Zinc",
+    "atomicMass": "65.38(2)",
+    "electronicConfiguration": "[Ar] 3d10 4s2",
+    "standardState": "solid",
+    "groupBlock": "transition metal"
+  },
+  {
+    "atomicNumber": 31,
+    "symbol": "Ga",
+    "name": "Gallium",
+    "atomicMass": "69.723(1)",
+    "electronicConfiguration": "[Ar] 3d10 4s2 4p1",
+    "standardState": "solid",
+    "groupBlock": "metal"
+  },
+  {
+    "atomicNumber": 32,
+    "symbol": "Ge",
+    "name": "Germanium",
+    "atomicMass": "72.64(1)",
+    "electronicConfiguration": "[Ar] 3d10 4s2 4p2",
+    "standardState": "solid",
+    "groupBlock": "metalloid"
+  },
+  {
+    "atomicNumber": 33,
+    "symbol": "As",
+    "name": "Arsenic",
+    "atomicMass": "74.92160(2)",
+    "electronicConfiguration": "[Ar] 3d10 4s2 4p3",
+    "standardState": "solid",
+    "groupBlock": "metalloid"
+  },
+  {
+    "atomicNumber": 34,
+    "symbol": "Se",
+    "name": "Selenium",
+    "atomicMass": "78.96(3)",
+    "electronicConfiguration": "[Ar] 3d10 4s2 4p4",
+    "standardState": "solid",
+    "groupBlock": "nonmetal"
+  },
+  {
+    "atomicNumber": 35,
+    "symbol": "Br",
+    "name": "Bromine",
+    "atomicMass": "79.904(1)",
+    "electronicConfiguration": "[Ar] 3d10 4s2 4p5",
+    "standardState": "liquid",
+    "groupBlock": "halogen"
+  },
+  {
+    "atomicNumber": 36,
+    "symbol": "Kr",
+    "name": "Krypton",
+    "atomicMass": "83.798(2)",
+    "electronicConfiguration": "[Ar] 3d10 4s2 4p6",
+    "standardState": "gas",
+    "groupBlock": "noble gas"
+  },
+  {
+    "atomicNumber": 37,
+    "symbol": "Rb",
+    "name": "Rubidium",
+    "atomicMass": "85.4678(3)",
+    "electronicConfiguration": "[Kr] 5s1",
+    "standardState": "solid",
+    "groupBlock": "alkali metal"
+  },
+  {
+    "atomicNumber": 38,
+    "symbol": "Sr",
+    "name": "Strontium",
+    "atomicMass": "87.62(1)",
+    "electronicConfiguration": "[Kr] 5s2",
+    "standardState": "solid",
+    "groupBlock": "alkaline earth metal"
+  },
+  {
+    "atomicNumber": 39,
+    "symbol": "Y",
+    "name": "Yttrium",
+    "atomicMass": "88.90585(2)",
+    "electronicConfiguration": "[Kr] 4d1 5s2",
+    "standardState": "solid",
+    "groupBlock": "transition metal"
+  },
+  {
+    "atomicNumber": 40,
+    "symbol": "Zr",
+    "name": "Zirconium",
+    "atomicMass": "91.224(2)",
+    "electronicConfiguration": "[Kr] 4d2 5s2",
+    "standardState": "solid",
+    "groupBlock": "transition metal"
+  },
+  {
+    "atomicNumber": 41,
+    "symbol": "Nb",
+    "name": "Niobium",
+    "atomicMass": "92.90638(2)",
+    "electronicConfiguration": "[Kr] 4d4 5s1",
+    "standardState": "solid",
+    "groupBlock": "transition metal"
+  },
+  {
+    "atomicNumber": 42,
+    "symbol": "Mo",
+    "name": "Molybdenum",
+    "atomicMass": "95.96(2)",
+    "electronicConfiguration": "[Kr] 4d5 5s1",
+    "standardState": "solid",
+    "groupBlock": "transition metal"
+  },
+  {
+    "atomicNumber": 43,
+    "symbol": "Tc",
+    "name": "Technetium",
+    "atomicMass": [
+      98
+    ],
+    "electronicConfiguration": "[Kr] 4d5 5s2",
+    "standardState": "solid",
+    "groupBlock": "transition metal"
+  },
+  {
+    "atomicNumber": 44,
+    "symbol": "Ru",
+    "name": "Ruthenium",
+    "atomicMass": "101.07(2)",
+    "electronicConfiguration": "[Kr] 4d7 5s1",
+    "standardState": "solid",
+    "groupBlock": "transition metal"
+  },
+  {
+    "atomicNumber": 45,
+    "symbol": "Rh",
+    "name": "Rhodium",
+    "atomicMass": "102.90550(2)",
+    "electronicConfiguration": "[Kr] 4d8 5s1",
+    "standardState": "solid",
+    "groupBlock": "transition metal"
+  },
+  {
+    "atomicNumber": 46,
+    "symbol": "Pd",
+    "name": "Palladium",
+    "atomicMass": "106.42(1)",
+    "electronicConfiguration": "[Kr] 4d10",
+    "standardState": "solid",
+    "groupBlock": "transition metal"
+  },
+  {
+    "atomicNumber": 47,
+    "symbol": "Ag",
+    "name": "Silver",
+    "atomicMass": "107.8682(2)",
+    "electronicConfiguration": "[Kr] 4d10 5s1",
+    "standardState": "solid",
+    "groupBlock": "transition metal"
+  },
+  {
+    "atomicNumber": 48,
+    "symbol": "Cd",
+    "name": "Cadmium",
+    "atomicMass": "112.411(8)",
+    "electronicConfiguration": "[Kr] 4d10 5s2",
+    "standardState": "solid",
+    "groupBlock": "transition metal"
+  },
+  {
+    "atomicNumber": 49,
+    "symbol": "In",
+    "name": "Indium",
+    "atomicMass": "114.818(3)",
+    "electronicConfiguration": "[Kr] 4d10 5s2 5p1",
+    "standardState": "solid",
+    "groupBlock": "metal"
+  },
+  {
+    "atomicNumber": 50,
+    "symbol": "Sn",
+    "name": "Tin",
+    "atomicMass": "118.710(7)",
+    "electronicConfiguration": "[Kr] 4d10 5s2 5p2",
+    "standardState": "solid",
+    "groupBlock": "metal"
+  },
+  {
+    "atomicNumber": 51,
+    "symbol": "Sb",
+    "name": "Antimony",
+    "atomicMass": "121.760(1)",
+    "electronicConfiguration": "[Kr] 4d10 5s2 5p3",
+    "standardState": "solid",
+    "groupBlock": "metalloid"
+  },
+  {
+    "atomicNumber": 52,
+    "symbol": "Te",
+    "name": "Tellurium",
+    "atomicMass": "127.60(3)",
+    "electronicConfiguration": "[Kr] 4d10 5s2 5p4",
+    "standardState": "solid",
+    "groupBlock": "metalloid"
+  },
+  {
+    "atomicNumber": 53,
+    "symbol": "I",
+    "name": "Iodine",
+    "atomicMass": "126.90447(3)",
+    "electronicConfiguration": "[Kr] 4d10 5s2 5p5",
+    "standardState": "solid",
+    "groupBlock": "halogen"
+  },
+  {
+    "atomicNumber": 54,
+    "symbol": "Xe",
+    "name": "Xenon",
+    "atomicMass": "131.293(6)",
+    "electronicConfiguration": "[Kr] 4d10 5s2 5p6",
+    "standardState": "gas",
+    "groupBlock": "noble gas"
+  },
+  {
+    "atomicNumber": 55,
+    "symbol": "Cs",
+    "name": "Cesium",
+    "atomicMass": "132.9054519(2)",
+    "electronicConfiguration": "[Xe] 6s1",
+    "standardState": "solid",
+    "groupBlock": "alkali metal"
+  },
+  {
+    "atomicNumber": 56,
+    "symbol": "Ba",
+    "name": "Barium",
+    "atomicMass": "137.327(7)",
+    "electronicConfiguration": "[Xe] 6s2",
+    "standardState": "solid",
+    "groupBlock": "alkaline earth metal"
+  },
+  {
+    "atomicNumber": 57,
+    "symbol": "La",
+    "name": "Lanthanum",
+    "atomicMass": "138.90547(7)",
+    "electronicConfiguration": "[Xe] 5d1 6s2",
+    "standardState": "solid",
+    "groupBlock": "lanthanoid"
+  },
+  {
+    "atomicNumber": 58,
+    "symbol": "Ce",
+    "name": "Cerium",
+    "atomicMass": "140.116(1)",
+    "electronicConfiguration": "[Xe] 4f1 5d1 6s2",
+    "standardState": "solid",
+    "groupBlock": "lanthanoid"
+  },
+  {
+    "atomicNumber": 59,
+    "symbol": "Pr",
+    "name": "Praseodymium",
+    "atomicMass": "140.90765(2)",
+    "electronicConfiguration": "[Xe] 4f3 6s2",
+    "standardState": "solid",
+    "groupBlock": "lanthanoid"
+  },
+  {
+    "atomicNumber": 60,
+    "symbol": "Nd",
+    "name": "Neodymium",
+    "atomicMass": "144.242(3)",
+    "electronicConfiguration": "[Xe] 4f4 6s2",
+    "standardState": "solid",
+    "groupBlock": "lanthanoid"
+  },
+  {
+    "atomicNumber": 61,
+    "symbol": "Pm",
+    "name": "Promethium",
+    "atomicMass": [
+      145
+    ],
+    "electronicConfiguration": "[Xe] 4f5 6s2",
+    "standardState": "solid",
+    "groupBlock": "lanthanoid"
+  },
+  {
+    "atomicNumber": 62,
+    "symbol": "Sm",
+    "name": "Samarium",
+    "atomicMass": "150.36(2)",
+    "electronicConfiguration": "[Xe] 4f6 6s2",
+    "standardState": "solid",
+    "groupBlock": "lanthanoid"
+  },
+  {
+    "atomicNumber": 63,
+    "symbol": "Eu",
+    "name": "Europium",
+    "atomicMass": "151.964(1)",
+    "electronicConfiguration": "[Xe] 4f7 6s2",
+    "standardState": "solid",
+    "groupBlock": "lanthanoid"
+  },
+  {
+    "atomicNumber": 64,
+    "symbol": "Gd",
+    "name": "Gadolinium",
+    "atomicMass": "157.25(3)",
+    "electronicConfiguration": "[Xe] 4f7 5d1 6s2",
+    "standardState": "solid",
+    "groupBlock": "lanthanoid"
+  },
+  {
+    "atomicNumber": 65,
+    "symbol": "Tb",
+    "name": "Terbium",
+    "atomicMass": "158.92535(2)",
+    "electronicConfiguration": "[Xe] 4f9 6s2",
+    "standardState": "solid",
+    "groupBlock": "lanthanoid"
+  },
+  {
+    "atomicNumber": 66,
+    "symbol": "Dy",
+    "name": "Dysprosium",
+    "atomicMass": "162.500(1)",
+    "electronicConfiguration": "[Xe] 4f10 6s2",
+    "standardState": "solid",
+    "groupBlock": "lanthanoid"
+  },
+  {
+    "atomicNumber": 67,
+    "symbol": "Ho",
+    "name": "Holmium",
+    "atomicMass": "164.93032(2)",
+    "electronicConfiguration": "[Xe] 4f11 6s2",
+    "standardState": "solid",
+    "groupBlock": "lanthanoid"
+  },
+  {
+    "atomicNumber": 68,
+    "symbol": "Er",
+    "name": "Erbium",
+    "atomicMass": "167.259(3)",
+    "electronicConfiguration": "[Xe] 4f12 6s2",
+    "standardState": "solid",
+    "groupBlock": "lanthanoid"
+  },
+  {
+    "atomicNumber": 69,
+    "symbol": "Tm",
+    "name": "Thulium",
+    "atomicMass": "168.93421(2)",
+    "electronicConfiguration": "[Xe] 4f13 6s2",
+    "standardState": "solid",
+    "groupBlock": "lanthanoid"
+  },
+  {
+    "atomicNumber": 70,
+    "symbol": "Yb",
+    "name": "Ytterbium",
+    "atomicMass": "173.054(5)",
+    "electronicConfiguration": "[Xe] 4f14 6s2",
+    "standardState": "solid",
+    "groupBlock": "lanthanoid"
+  },
+  {
+    "atomicNumber": 71,
+    "symbol": "Lu",
+    "name": "Lutetium",
+    "atomicMass": "174.9668(1)",
+    "electronicConfiguration": "[Xe] 4f14 5d1 6s2",
+    "standardState": "solid",
+    "groupBlock": "lanthanoid"
+  },
+  {
+    "atomicNumber": 72,
+    "symbol": "Hf",
+    "name": "Hafnium",
+    "atomicMass": "178.49(2)",
+    "electronicConfiguration": "[Xe] 4f14 5d2 6s2",
+    "standardState": "solid",
+    "groupBlock": "transition metal"
+  },
+  {
+    "atomicNumber": 73,
+    "symbol": "Ta",
+    "name": "Tantalum",
+    "atomicMass": "180.94788(2)",
+    "electronicConfiguration": "[Xe] 4f14 5d3 6s2",
+    "standardState": "solid",
+    "groupBlock": "transition metal"
+  },
+  {
+    "atomicNumber": 74,
+    "symbol": "W",
+    "name": "Tungsten",
+    "atomicMass": "183.84(1)",
+    "electronicConfiguration": "[Xe] 4f14 5d4 6s2",
+    "standardState": "solid",
+    "groupBlock": "transition metal"
+  },
+  {
+    "atomicNumber": 75,
+    "symbol": "Re",
+    "name": "Rhenium",
+    "atomicMass": "186.207(1)",
+    "electronicConfiguration": "[Xe] 4f14 5d5 6s2",
+    "standardState": "solid",
+    "groupBlock": "transition metal"
+  },
+  {
+    "atomicNumber": 76,
+    "symbol": "Os",
+    "name": "Osmium",
+    "atomicMass": "190.23(3)",
+    "electronicConfiguration": "[Xe] 4f14 5d6 6s2",
+    "standardState": "solid",
+    "groupBlock": "transition metal"
+  },
+  {
+    "atomicNumber": 77,
+    "symbol": "Ir",
+    "name": "Iridium",
+    "atomicMass": "192.217(3)",
+    "electronicConfiguration": "[Xe] 4f14 5d7 6s2",
+    "standardState": "solid",
+    "groupBlock": "transition metal"
+  },
+  {
+    "atomicNumber": 78,
+    "symbol": "Pt",
+    "name": "Platinum",
+    "atomicMass": "195.084(9)",
+    "electronicConfiguration": "[Xe] 4f14 5d9 6s1",
+    "standardState": "solid",
+    "groupBlock": "transition metal"
+  },
+  {
+    "atomicNumber": 79,
+    "symbol": "Au",
+    "name": "Gold",
+    "atomicMass": "196.966569(4)",
+    "electronicConfiguration": "[Xe] 4f14 5d10 6s1",
+    "standardState": "solid",
+    "groupBlock": "transition metal"
+  },
+  {
+    "atomicNumber": 80,
+    "symbol": "Hg",
+    "name": "Mercury",
+    "atomicMass": "200.59(2)",
+    "electronicConfiguration": "[Xe] 4f14 5d10 6s2",
+    "standardState": "liquid",
+    "groupBlock": "transition metal"
+  },
+  {
+    "atomicNumber": 81,
+    "symbol": "Tl",
+    "name": "Thallium",
+    "atomicMass": "204.3833(2)",
+    "electronicConfiguration": "[Xe] 4f14 5d10 6s2 6p1",
+    "standardState": "solid",
+    "groupBlock": "metal"
+  },
+  {
+    "atomicNumber": 82,
+    "symbol": "Pb",
+    "name": "Lead",
+    "atomicMass": "207.2(1)",
+    "electronicConfiguration": "[Xe] 4f14 5d10 6s2 6p2",
+    "standardState": "solid",
+    "groupBlock": "metal"
+  },
+  {
+    "atomicNumber": 83,
+    "symbol": "Bi",
+    "name": "Bismuth",
+    "atomicMass": "208.98040(1)",
+    "electronicConfiguration": "[Xe] 4f14 5d10 6s2 6p3",
+    "standardState": "solid",
+    "groupBlock": "metal"
+  },
+  {
+    "atomicNumber": 84,
+    "symbol": "Po",
+    "name": "Polonium",
+    "atomicMass": [
+      209
+    ],
+    "electronicConfiguration": "[Xe] 4f14 5d10 6s2 6p4",
+    "standardState": "solid",
+    "groupBlock": "metalloid"
+  },
+  {
+    "atomicNumber": 85,
+    "symbol": "At",
+    "name": "Astatine",
+    "atomicMass": [
+      210
+    ],
+    "electronicConfiguration": "[Xe] 4f14 5d10 6s2 6p5",
+    "standardState": "solid",
+    "groupBlock": "halogen"
+  },
+  {
+    "atomicNumber": 86,
+    "symbol": "Rn",
+    "name": "Radon",
+    "atomicMass": [
+      222
+    ],
+    "electronicConfiguration": "[Xe] 4f14 5d10 6s2 6p6",
+    "standardState": "gas",
+    "groupBlock": "noble gas"
+  },
+  {
+    "atomicNumber": 87,
+    "symbol": "Fr",
+    "name": "Francium",
+    "atomicMass": [
+      223
+    ],
+    "electronicConfiguration": "[Rn] 7s1",
+    "standardState": "solid",
+    "groupBlock": "alkali metal"
+  },
+  {
+    "atomicNumber": 88,
+    "symbol": "Ra",
+    "name": "Radium",
+    "atomicMass": [
+      226
+    ],
+    "electronicConfiguration": "[Rn] 7s2",
+    "standardState": "solid",
+    "groupBlock": "alkaline earth metal"
+  },
+  {
+    "atomicNumber": 89,
+    "symbol": "Ac",
+    "name": "Actinium",
+    "atomicMass": [
+      227
+    ],
+    "electronicConfiguration": "[Rn] 6d1 7s2",
+    "standardState": "solid",
+    "groupBlock": "actinoid"
+  },
+  {
+    "atomicNumber": 90,
+    "symbol": "Th",
+    "name": "Thorium",
+    "atomicMass": "232.03806(2)",
+    "electronicConfiguration": "[Rn] 6d2 7s2",
+    "standardState": "solid",
+    "groupBlock": "actinoid"
+  },
+  {
+    "atomicNumber": 91,
+    "symbol": "Pa",
+    "name": "Protactinium",
+    "atomicMass": "231.03588(2)",
+    "electronicConfiguration": "[Rn] 5f2 6d1 7s2",
+    "standardState": "solid",
+    "groupBlock": "actinoid"
+  },
+  {
+    "atomicNumber": 92,
+    "symbol": "U",
+    "name": "Uranium",
+    "atomicMass": "238.02891(3)",
+    "electronicConfiguration": "[Rn] 5f3 6d1 7s2",
+    "standardState": "solid",
+    "groupBlock": "actinoid"
+  },
+  {
+    "atomicNumber": 93,
+    "symbol": "Np",
+    "name": "Neptunium",
+    "atomicMass": [
+      237
+    ],
+    "electronicConfiguration": "[Rn] 5f4 6d1 7s2",
+    "standardState": "solid",
+    "groupBlock": "actinoid"
+  },
+  {
+    "atomicNumber": 94,
+    "symbol": "Pu",
+    "name": "Plutonium",
+    "atomicMass": [
+      244
+    ],
+    "electronicConfiguration": "[Rn] 5f6 7s2",
+    "standardState": "solid",
+    "groupBlock": "actinoid"
+  },
+  {
+    "atomicNumber": 95,
+    "symbol": "Am",
+    "name": "Americium",
+    "atomicMass": [
+      243
+    ],
+    "electronicConfiguration": "[Rn] 5f7 7s2",
+    "standardState": "solid",
+    "groupBlock": "actinoid"
+  },
+  {
+    "atomicNumber": 96,
+    "symbol": "Cm",
+    "name": "Curium",
+    "atomicMass": [
+      247
+    ],
+    "electronicConfiguration": "[Rn] 5f7 6d1 7s2",
+    "standardState": "solid",
+    "groupBlock": "actinoid"
+  },
+  {
+    "atomicNumber": 97,
+    "symbol": "Bk",
+    "name": "Berkelium",
+    "atomicMass": [
+      247
+    ],
+    "electronicConfiguration": "[Rn] 5f9 7s2",
+    "standardState": "solid",
+    "groupBlock": "actinoid"
+  },
+  {
+    "atomicNumber": 98,
+    "symbol": "Cf",
+    "name": "Californium",
+    "atomicMass": [
+      251
+    ],
+    "electronicConfiguration": "[Rn] 5f10 7s2",
+    "standardState": "solid",
+    "groupBlock": "actinoid"
+  },
+  {
+    "atomicNumber": 99,
+    "symbol": "Es",
+    "name": "Einsteinium",
+    "atomicMass": [
+      252
+    ],
+    "electronicConfiguration": "[Rn] 5f11 7s2",
+    "standardState": "solid",
+    "groupBlock": "actinoid"
+  },
+  {
+    "atomicNumber": 100,
+    "symbol": "Fm",
+    "name": "Fermium",
+    "atomicMass": [
+      257
+    ],
+    "electronicConfiguration": "[Rn] 5f12 7s2",
+    "standardState": "",
+    "groupBlock": "actinoid"
+  },
+  {
+    "atomicNumber": 101,
+    "symbol": "Md",
+    "name": "Mendelevium",
+    "atomicMass": [
+      258
+    ],
+    "electronicConfiguration": "[Rn] 5f13 7s2",
+    "standardState": "",
+    "groupBlock": "actinoid"
+  },
+  {
+    "atomicNumber": 102,
+    "symbol": "No",
+    "name": "Nobelium",
+    "atomicMass": [
+      259
+    ],
+    "electronicConfiguration": "[Rn] 5f14 7s2",
+    "standardState": "",
+    "groupBlock": "actinoid"
+  },
+  {
+    "atomicNumber": 103,
+    "symbol": "Lr",
+    "name": "Lawrencium",
+    "atomicMass": [
+      262
+    ],
+    "electronicConfiguration": "[Rn] 5f14 7s2 7p1",
+    "standardState": "",
+    "groupBlock": "transition metal"
+  },
+  {
+    "atomicNumber": 104,
+    "symbol": "Rf",
+    "name": "Rutherfordium",
+    "atomicMass": [
+      267
+    ],
+    "electronicConfiguration": "[Rn] 5f14 6d2 7s2",
+    "standardState": "",
+    "groupBlock": "transition metal"
+  },
+  {
+    "atomicNumber": 105,
+    "symbol": "Db",
+    "name": "Dubnium",
+    "atomicMass": [
+      268
+    ],
+    "electronicConfiguration": "[Rn] 5f14 6d3 7s2",
+    "standardState": "",
+    "groupBlock": "transition metal"
+  },
+  {
+    "atomicNumber": 106,
+    "symbol": "Sg",
+    "name": "Seaborgium",
+    "atomicMass": [
+      271
+    ],
+    "electronicConfiguration": "[Rn] 5f14 6d4 7s2",
+    "standardState": "",
+    "groupBlock": "transition metal"
+  },
+  {
+    "atomicNumber": 107,
+    "symbol": "Bh",
+    "name": "Bohrium",
+    "atomicMass": [
+      272
+    ],
+    "electronicConfiguration": "[Rn] 5f14 6d5 7s2",
+    "standardState": "",
+    "groupBlock": "transition metal"
+  },
+  {
+    "atomicNumber": 108,
+    "symbol": "Hs",
+    "name": "Hassium",
+    "atomicMass": [
+      270
+    ],
+    "electronicConfiguration": "[Rn] 5f14 6d6 7s2",
+    "standardState": "",
+    "groupBlock": "transition metal"
+  },
+  {
+    "atomicNumber": 109,
+    "symbol": "Mt",
+    "name": "Meitnerium",
+    "atomicMass": [
+      276
+    ],
+    "electronicConfiguration": "[Rn] 5f14 6d7 7s2",
+    "standardState": "",
+    "groupBlock": "transition metal"
+  },
+  {
+    "atomicNumber": 110,
+    "symbol": "Ds",
+    "name": "Darmstadtium",
+    "atomicMass": [
+      281
+    ],
+    "electronicConfiguration": "[Rn] 5f14 6d9 7s1",
+    "standardState": "",
+    "groupBlock": "transition metal"
+  },
+  {
+    "atomicNumber": 111,
+    "symbol": "Rg",
+    "name": "Roentgenium",
+    "atomicMass": [
+      280
+    ],
+    "electronicConfiguration": "[Rn] 5f14 6d10 7s1",
+    "standardState": "",
+    "groupBlock": "transition metal"
+  },
+  {
+    "atomicNumber": 112,
+    "symbol": "Cn",
+    "name": "Copernicium",
+    "atomicMass": [
+      285
+    ],
+    "electronicConfiguration": "[Rn] 5f14 6d10 7s2",
+    "standardState": "",
+    "groupBlock": "transition metal"
+  },
+  {
+    "atomicNumber": 113,
+    "symbol": "Nh",
+    "name": "Nihonium",
+    "atomicMass": [
+      284
+    ],
+    "electronicConfiguration": "[Rn] 5f14 6d10 7s2 7p1",
+    "standardState": "",
+    "groupBlock": "post-transition metal"
+  },
+  {
+    "atomicNumber": 114,
+    "symbol": "Fl",
+    "name": "Flerovium",
+    "atomicMass": [
+      289
+    ],
+    "electronicConfiguration": "[Rn] 5f14 6d10 7s2 7p2",
+    "standardState": "",
+    "groupBlock": "post-transition metal"
+  },
+  {
+    "atomicNumber": 115,
+    "symbol": "Mc",
+    "name": "Moscovium",
+    "atomicMass": [
+      288
+    ],
+    "electronicConfiguration": "[Rn] 5f14 6d10 7s2 7p3",
+    "standardState": "",
+    "groupBlock": "post-transition metal"
+  },
+  {
+    "atomicNumber": 116,
+    "symbol": "Lv",
+    "name": "Livermorium",
+    "atomicMass": [
+      293
+    ],
+    "electronicConfiguration": "[Rn] 5f14 6d10 7s2 7p4",
+    "standardState": "",
+    "groupBlock": "post-transition metal"
+  },
+  {
+    "atomicNumber": 117,
+    "symbol": "Ts",
+    "name": "Tennessine",
+    "atomicMass": [
+      294
+    ],
+    "electronicConfiguration": "[Rn] 5f14 6d10 7s2 7p5",
+    "standardState": "",
+    "groupBlock": "post-transition metal"
+  },
+  {
+    "atomicNumber": 118,
+    "symbol": "Og",
+    "name": "Oganesson",
+    "atomicMass": [
+      294
+    ],
+    "electronicConfiguration": "[Rn] 5f14 6d10 7s2 7p6",
+    "standardState": "",
+    "groupBlock": "noble gas"
+  }
+]

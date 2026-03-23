@@ -6,9 +6,10 @@ import { BattleScene } from '../game/scenes/BattleScene';
 
 interface GameCanvasProps {
     onGameOver: (winner: string, playerHp: number, aiHp: number) => void;
+    selectedElements: string[];
 }
 
-export function GameCanvas({ onGameOver }: GameCanvasProps) {
+export function GameCanvas({ onGameOver, selectedElements }: GameCanvasProps) {
     const containerRef = useRef<HTMLDivElement>(null);
     const gameRef = useRef<Phaser.Game | null>(null);
 
@@ -29,6 +30,11 @@ export function GameCanvas({ onGameOver }: GameCanvasProps) {
             scale: {
                 mode: Phaser.Scale.FIT,
                 autoCenter: Phaser.Scale.CENTER_BOTH,
+            },
+            callbacks: {
+                preBoot: (game) => {
+                    game.registry.set('selectedElements', selectedElements);
+                },
             },
         };
 
@@ -58,7 +64,7 @@ export function GameCanvas({ onGameOver }: GameCanvasProps) {
             gameRef.current?.destroy(true);
             gameRef.current = null;
         };
-    }, [onGameOver]);
+    }, [onGameOver, selectedElements]);
 
     return (
         <div
