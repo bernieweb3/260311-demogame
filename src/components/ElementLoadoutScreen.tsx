@@ -8,8 +8,13 @@ const rawElementImageUrls = import.meta.glob('../../img/nguyento/*.svg', {
 }) as Record<string, string>;
 
 interface ElementLoadoutScreenProps {
-    onStartGame: (selectedElements: string[]) => void;
+    onStartGame: (selectedElements: SelectedLoadoutItem[]) => void;
     onBack: () => void;
+}
+
+export interface SelectedLoadoutItem {
+    symbol: string;
+    imageUrl: string | null;
 }
 
 type ThemeMode = 'light' | 'dark';
@@ -153,6 +158,24 @@ const SYMBOL_IMAGE_HINTS: Record<string, string[]> = {
     Te: ['tellurium', 'te'],
     I: ['iodine', 'i'],
     Xe: ['xenon', 'xe'],
+    Cs: ['caesium', 'cesium', 'cs'],
+    Ba: ['barium', 'bari', 'ba'],
+    La: ['lanthanum', 'la'],
+    Hf: ['hafnium', 'hf'],
+    Ta: ['tantalum', 'ta'],
+    W: ['tungsten', 'wolfram', 'w'],
+    Re: ['rhenium', 're'],
+    Os: ['osmium', 'os'],
+    Ir: ['iridium', 'ir'],
+    Pt: ['platinum', 'pt'],
+    Au: ['gold', 'aurum', 'au'],
+    Hg: ['mercury', 'hydrargyrum', 'hg'],
+    Tl: ['thallium', 'tl'],
+    Pb: ['lead', 'plumbum', 'pb'],
+    Bi: ['bismuth', 'bi'],
+    Po: ['polonium', 'po'],
+    At: ['astatine', 'at'],
+    Rn: ['radon', 'rn'],
     Fr: ['francium', 'fr'],
     Ra: ['radium', 'ra'],
     Ac: ['actinideum', 'actinium', 'ac'],
@@ -816,7 +839,7 @@ export function ElementLoadoutScreen({ onStartGame, onBack }: ElementLoadoutScre
                             </div>
 
                             <button
-                                onClick={() => onStartGame(selectedLoadout)}
+                                onClick={() => onStartGame(selectedLoadout.map((symbol) => ({ symbol, imageUrl: getElementImageUrl(symbol) })))}
                                 disabled={!canStart}
                                 style={{
                                     marginTop: 12,

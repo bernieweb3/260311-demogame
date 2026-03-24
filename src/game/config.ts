@@ -1,6 +1,12 @@
 // Game constants
-export const GAME_WIDTH = 1200;
-export const GAME_HEIGHT = 700;
+export const GAME_WIDTH = 1600;
+export const GAME_HEIGHT = 900;
+
+export const LEFT_ZONE_WIDTH = 520;
+export const CENTER_GAP_WIDTH = 560;
+export const RIGHT_ZONE_START = LEFT_ZONE_WIDTH + CENTER_GAP_WIDTH;
+export const GROUND_Y = 700;
+export const GROUND_HEIGHT = 200;
 
 export const GRAVITY = 800;
 export const JUMP_FORCE = -450;
@@ -27,18 +33,18 @@ export interface PlatformDef {
 
 export const PLATFORMS: PlatformDef[] = [
     // Left island ground
-    { x: 0, y: 550, width: 400, height: 150, side: 'left' },
+    { x: 0, y: GROUND_Y, width: LEFT_ZONE_WIDTH, height: GROUND_HEIGHT, side: 'left' },
     // Left floating platforms
-    { x: 50, y: 450, width: 100, height: 20, side: 'left' },
-    { x: 200, y: 380, width: 120, height: 20, side: 'left' },
-    { x: 80, y: 300, width: 100, height: 20, side: 'left' },
-    { x: 250, y: 230, width: 100, height: 20, side: 'left' },
+    { x: 70, y: 580, width: 130, height: 22, side: 'left' },
+    { x: 240, y: 500, width: 150, height: 22, side: 'left' },
+    { x: 100, y: 410, width: 130, height: 22, side: 'left' },
+    { x: 300, y: 320, width: 130, height: 22, side: 'left' },
 
     // Right island ground
-    { x: 800, y: 550, width: 400, height: 150, side: 'right' },
+    { x: RIGHT_ZONE_START, y: GROUND_Y, width: LEFT_ZONE_WIDTH, height: GROUND_HEIGHT, side: 'right' },
     // Right floating platforms
-    { x: 1050, y: 450, width: 100, height: 20, side: 'right' },
-    { x: 880, y: 380, width: 120, height: 20, side: 'right' },
-    { x: 1020, y: 300, width: 100, height: 20, side: 'right' },
-    { x: 850, y: 230, width: 100, height: 20, side: 'right' },
+    { x: 1410, y: 580, width: 130, height: 22, side: 'right' },
+    { x: 1210, y: 500, width: 150, height: 22, side: 'right' },
+    { x: 1370, y: 410, width: 130, height: 22, side: 'right' },
+    { x: 1170, y: 320, width: 130, height: 22, side: 'right' },
 ];

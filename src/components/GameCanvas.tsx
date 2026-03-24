@@ -7,9 +7,11 @@ import { BattleScene } from '../game/scenes/BattleScene';
 interface GameCanvasProps {
     onGameOver: (winner: string, playerHp: number, aiHp: number) => void;
     selectedElements: string[];
+    selectedElementImageUrls: Record<string, string>;
+    fullViewport?: boolean;
 }
 
-export function GameCanvas({ onGameOver, selectedElements }: GameCanvasProps) {
+export function GameCanvas({ onGameOver, selectedElements, selectedElementImageUrls, fullViewport = false }: GameCanvasProps) {
     const containerRef = useRef<HTMLDivElement>(null);
     const gameRef = useRef<Phaser.Game | null>(null);
 
@@ -34,6 +36,7 @@ export function GameCanvas({ onGameOver, selectedElements }: GameCanvasProps) {
             callbacks: {
                 preBoot: (game) => {
                     game.registry.set('selectedElements', selectedElements);
+                    game.registry.set('selectedElementImageUrls', selectedElementImageUrls);
                 },
             },
         };
@@ -64,20 +67,21 @@ export function GameCanvas({ onGameOver, selectedElements }: GameCanvasProps) {
             gameRef.current?.destroy(true);
             gameRef.current = null;
         };
-    }, [onGameOver, selectedElements]);
+    }, [onGameOver, selectedElements, selectedElementImageUrls]);
 
     return (
         <div
             ref={containerRef}
             style={{
                 width: '100%',
-                maxWidth: GAME_WIDTH,
-                aspectRatio: `${GAME_WIDTH}/${GAME_HEIGHT}`,
+                maxWidth: fullViewport ? '100vw' : GAME_WIDTH,
+                height: fullViewport ? '100vh' : 'auto',
+                aspectRatio: fullViewport ? undefined : `${GAME_WIDTH}/${GAME_HEIGHT}`,
                 margin: '0 auto',
-                borderRadius: '12px',
+                borderRadius: fullViewport ? '0' : '12px',
                 overflow: 'hidden',
                 boxShadow: '0 0 40px rgba(76, 175, 80, 0.15), 0 0 80px rgba(0,0,0,0.6)',
-                border: '2px solid rgba(76, 175, 80, 0.2)',
+                border: fullViewport ? '0' : '2px solid rgba(76, 175, 80, 0.2)',
             }}
         />
     );

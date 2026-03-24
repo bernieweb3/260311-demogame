@@ -2,141 +2,148 @@ interface MainMenuProps {
     onStartGame: () => void;
 }
 
+import './MainMenu.css';
+
 export function MainMenu({ onStartGame }: MainMenuProps) {
+    const gameModes = [
+        { name: 'Solo', accent: 'mode-solo', note: '1 v 1 tactical duel', icon: '🧑', badge: 'S' },
+        { name: 'Duo', accent: 'mode-duo', note: '2 pilots, one drop', icon: '👫', badge: 'D' },
+        { name: 'Squad', accent: 'mode-squad', note: '4-player blitz battle', icon: '🧑‍🤝‍🧑', badge: 'Q' },
+    ];
+
+    const railItems = [
+        { icon: '🛡', label: 'Profile' },
+        { icon: '⚔', label: 'Battle', active: true },
+        { icon: '🛒', label: 'Shop', hasNotification: true },
+        { icon: '👥', label: 'Friends', hasNotification: true },
+        { icon: '🏆', label: 'Leaderboard' },
+    ];
+
     return (
-        <div style={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            minHeight: '100vh',
-            background: 'linear-gradient(135deg, #0d0d1a 0%, #131336 40%, #0a1628 100%)',
-            color: '#fff',
-            fontFamily: '"Courier New", monospace',
-            position: 'relative',
-            overflow: 'hidden',
-        }}>
-            {/* Background particles */}
-            <div style={{
-                position: 'absolute', inset: 0, pointerEvents: 'none',
-                background: 'radial-gradient(circle at 30% 20%, rgba(76,175,80,0.05) 0%, transparent 50%), radial-gradient(circle at 70% 80%, rgba(244,67,54,0.05) 0%, transparent 50%)',
-            }} />
+        <div className="lobby-root">
+            <div className="lobby-bg-grid" />
+            <div className="lobby-bg-orb orb-a" />
+            <div className="lobby-bg-orb orb-b" />
+            <div className="lobby-bg-orb orb-c" />
+            <div className="lobby-bg-orb orb-d" />
+            <div className="lobby-bg-orb orb-e" />
+            <div className="terrain-ring ring-a" />
+            <div className="terrain-ring ring-b" />
 
-            {/* Title */}
-            <h1 style={{
-                fontSize: '120px',
-                fontWeight: 900,
-                letterSpacing: '20px',
-                margin: 0,
-                background: 'linear-gradient(135deg, #4CAF50, #8BC34A, #4CAF50)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                textShadow: 'none',
-                filter: 'drop-shadow(0 0 30px rgba(76,175,80,0.3))',
-                animation: 'pulse 3s ease-in-out infinite',
-            }}>
-                BIT
-            </h1>
+            <header className="lobby-topbar">
+                <div className="profile-chip">
+                    <div className="player-avatar">⚡</div>
+                    <div className="rank-badge">--</div>
+                    <div className="profile-meta">
+                        <div className="profile-name">Player</div>
+                        <div className="xp-track">
+                            <div className="xp-fill placeholder" />
+                        </div>
+                    </div>
+                </div>
 
-            <p style={{
-                fontSize: '16px',
-                color: '#888',
-                letterSpacing: '8px',
-                textTransform: 'uppercase',
-                marginTop: '-10px',
-                marginBottom: '50px',
-            }}>
-                Tactical Shooter
-            </p>
+                <div className="lobby-logo">
+                    <span>ELEMENTAL</span>
+                    <strong>SIEGE</strong>
+                </div>
 
-            {/* Mode Selection */}
-            <div style={{
-                display: 'flex',
-                gap: '16px',
-                marginBottom: '40px',
-            }}>
-                {[
-                    { label: '1 vs 1', active: true },
-                    { label: '2 vs 2', active: false },
-                    { label: '3 vs 3', active: false },
-                ].map((mode) => (
-                    <button
-                        key={mode.label}
-                        disabled={!mode.active}
-                        style={{
-                            padding: '12px 24px',
-                            fontSize: '14px',
-                            fontFamily: '"Courier New", monospace',
-                            fontWeight: 'bold',
-                            border: mode.active ? '2px solid #4CAF50' : '2px solid #333',
-                            borderRadius: '8px',
-                            background: mode.active ? 'rgba(76,175,80,0.15)' : 'rgba(255,255,255,0.03)',
-                            color: mode.active ? '#4CAF50' : '#555',
-                            cursor: mode.active ? 'pointer' : 'not-allowed',
-                            transition: 'all 0.3s ease',
-                            letterSpacing: '2px',
-                        }}
-                    >
-                        {mode.label}
-                        {!mode.active && <span style={{ display: 'block', fontSize: '9px', color: '#444', marginTop: '4px' }}>COMING SOON</span>}
+                <div className="topbar-actions">
+                    <button className="social-btn" aria-label="Discord">🎮</button>
+                    <button className="social-btn" aria-label="Reddit">🧡</button>
+                    <div className="currency gems">💎 --</div>
+                    <div className="currency coins">🪙 --</div>
+                    <button className="settings-btn" aria-label="Settings">⚙</button>
+                </div>
+            </header>
+
+            <aside className="left-rail">
+                {railItems.map((item) => (
+                    <button key={item.label} className={`rail-item ${item.active ? 'active' : ''}`}>
+                        <span className="rail-icon">{item.icon}</span>
+                        <span className="rail-label">{item.label}</span>
+                        {item.hasNotification && <span className="rail-badge dot" />}
                     </button>
                 ))}
-            </div>
+            </aside>
 
-            {/* Start Button */}
-            <button
-                onClick={onStartGame}
-                style={{
-                    padding: '18px 60px',
-                    fontSize: '20px',
-                    fontFamily: '"Courier New", monospace',
-                    fontWeight: 'bold',
-                    border: '2px solid #4CAF50',
-                    borderRadius: '12px',
-                    background: 'linear-gradient(135deg, rgba(76,175,80,0.2), rgba(76,175,80,0.05))',
-                    color: '#4CAF50',
-                    cursor: 'pointer',
-                    letterSpacing: '6px',
-                    textTransform: 'uppercase',
-                    transition: 'all 0.3s ease',
-                    boxShadow: '0 0 20px rgba(76,175,80,0.15)',
-                }}
-                onMouseEnter={(e) => {
-                    e.currentTarget.style.background = 'rgba(76,175,80,0.3)';
-                    e.currentTarget.style.boxShadow = '0 0 40px rgba(76,175,80,0.3)';
-                    e.currentTarget.style.transform = 'scale(1.05)';
-                }}
-                onMouseLeave={(e) => {
-                    e.currentTarget.style.background = 'linear-gradient(135deg, rgba(76,175,80,0.2), rgba(76,175,80,0.05))';
-                    e.currentTarget.style.boxShadow = '0 0 20px rgba(76,175,80,0.15)';
-                    e.currentTarget.style.transform = 'scale(1)';
-                }}
-            >
-                START BATTLE
-            </button>
+            <main className="lobby-main">
+                <section className="center-panel">
+                    <div className="settings-row">
+                        <div className="setting-box">Region: Auto (AS)</div>
+                        <div className="setting-box">Quality: High</div>
+                    </div>
 
-            {/* Feature highlights */}
-            <div style={{
-                display: 'flex',
-                gap: '40px',
-                marginTop: '60px',
-                opacity: 0.5,
-                fontSize: '11px',
-                letterSpacing: '2px',
-                textTransform: 'uppercase',
-            }}>
-                <span>⚛ Element Blocks</span>
-                <span>🎯 Arc Physics</span>
-                <span>🛡 Tactical Defense</span>
-                <span>⏱ 5 Min Rounds</span>
-            </div>
+                    <label className="nickname-wrap">
+                        <span>Set Your Nickname</span>
+                        <input value="" placeholder="Waiting for profile data" readOnly />
+                    </label>
 
-            <style>{`
-        @keyframes pulse {
-          0%, 100% { opacity: 1; }
-          50% { opacity: 0.85; }
-        }
-      `}</style>
+                    <div className="mode-heading">Choose a Game Mode</div>
+                    <div className="mode-grid">
+                        {gameModes.map((mode) => (
+                            <button key={mode.name} className={`mode-card ${mode.accent}`} onClick={onStartGame}>
+                                <div className="mode-icon-wrap">
+                                    <div className="mode-icon-badge">{mode.badge}</div>
+                                    <div className="mode-icon">{mode.icon}</div>
+                                </div>
+                                <div className="mode-name-row">
+                                    <div className="mode-name">{mode.name}</div>
+                                    <div className="mode-play">▶</div>
+                                </div>
+                                <div className="mode-note">{mode.note}</div>
+                            </button>
+                        ))}
+                    </div>
+
+                    <button className="vip-banner" onClick={onStartGame}>
+                        <div className="vip-glow" />
+                        <div className="vip-left">
+                            <div className="vip-icon">🌟</div>
+                            <div>
+                                <div className="vip-title">Protect the VIP</div>
+                                <div className="vip-sub">Limited mode is live - tap to deploy</div>
+                            </div>
+                        </div>
+                        <div className="vip-right">
+                            <div className="vip-tag">LIMITED</div>
+                            <div className="vip-timer">--:--</div>
+                        </div>
+                    </button>
+                </section>
+
+                <section className="right-panel">
+                    <article className="panel-card season-card">
+                        <div className="panel-head">
+                            <div className="panel-badge">🏆</div>
+                            <div className="panel-title">Season --</div>
+                        </div>
+                        <div className="panel-value">Tier --</div>
+                        <div className="season-progress">
+                            <div className="season-progress-fill placeholder" />
+                        </div>
+                        <div className="panel-meta">Progress data pending</div>
+                    </article>
+
+                    <article className="panel-card challenge-card">
+                        <div className="panel-title">Challenges</div>
+                        <div className="panel-value">--/--</div>
+                        <div className="challenge-list empty">
+                            <div className="challenge-item">
+                                <span>Challenge data pending</span>
+                                <span className="challenge-progress">--</span>
+                            </div>
+                        </div>
+                        <div className="panel-meta">Tasks will appear when backend is ready</div>
+                    </article>
+
+                    <article className="panel-card discover-card">
+                        <div className="panel-title">Info</div>
+                        <ul>
+                            <li>Content will be loaded from server</li>
+                        </ul>
+                    </article>
+                </section>
+            </main>
         </div>
     );
 }
