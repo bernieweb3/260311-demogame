@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { getMatchSocket, getResolvedMatchServerUrl } from '../network/matchSocket';
 import type { GameMode } from '../types/gameMode';
 
@@ -48,6 +48,7 @@ const MODE_LABEL: Record<Exclude<GameMode, 'vs-ai'>, string> = {
 
 export function MatchmakingScreen({ mode, nickname, onBack, onMatched }: MatchmakingScreenProps) {
     const [tab, setTab] = useState<MatchTab>('queue');
+    const tabRef = useRef<MatchTab>(tab);
     const [queueCount, setQueueCount] = useState(1);
     const [status, setStatus] = useState('Dang tim tran...');
     const [connectionStatus, setConnectionStatus] = useState('Dang ket noi server...');
@@ -59,13 +60,16 @@ export function MatchmakingScreen({ mode, nickname, onBack, onMatched }: Matchma
 
     const modeLabel = useMemo(() => MODE_LABEL[mode], [mode]);
 
+    // Keep tabRef in sync so cleanup closures always read the latest value
+    useEffect(() => { tabRef.current = tab; }, [tab]);
+
     useEffect(() => {
         const socket = getMatchSocket();
 
         const handleConnect = () => {
             setSelfId(socket.id ?? '');
             setConnectionStatus('Da ket noi matchmaking server');
-            if (tab === 'queue') {
+            if (tabRef.current === 'queue') {
                 setStatus('Dang tim tran...');
                 socket.emit('join_queue', { mode, nickname });
             }
@@ -117,8 +121,10 @@ export function MatchmakingScreen({ mode, nickname, onBack, onMatched }: Matchma
         }
 
         return () => {
-            if (tab === 'queue') {
+            if (tabRef.current === 'queue') {
                 socket.emit('leave_queue', { mode });
+            } else {
+                socket.emit('leave_custom_room', {});
             }
             socket.off('connect', handleConnect);
             socket.off('disconnect', handleDisconnect);
@@ -129,7 +135,7 @@ export function MatchmakingScreen({ mode, nickname, onBack, onMatched }: Matchma
             socket.off('room_update', handleRoomUpdate);
             socket.off('room_error', handleRoomError);
         };
-    }, [mode, nickname, onMatched, tab]);
+    }, [mode, nickname, onMatched]);
 
     useEffect(() => {
         const socket = getMatchSocket();

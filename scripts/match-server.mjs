@@ -269,6 +269,13 @@ function updateRoom(room, dtMs) {
             roomId: room.roomId,
             winnerTeam,
         });
+
+        // Schedule room cleanup after a short delay so clients receive game_over
+        setTimeout(() => {
+            rooms.delete(room.roomId);
+        }, 5000);
+
+        return; // Stop broadcasting state_update once game is over
     }
 
     io.to(room.roomId).emit('state_update', {
@@ -330,6 +337,13 @@ function startCustomRoomMatch(roomCode, starterId) {
     }
 
     customRooms.delete(roomCode);
+
+    // Clean up customRoomCode data from all members before starting the match
+    for (const memberId of room.members) {
+        const memberSocket = io.sockets.sockets.get(memberId);
+        if (memberSocket) delete memberSocket.data.customRoomCode;
+    }
+
     createRoom(room.mode, room.members.slice(0, required));
 }
 
