@@ -12,7 +12,11 @@ export const GRAVITY = 800;
 export const JUMP_FORCE = -450;
 export const MOVE_SPEED = 200;
 export const PROJECTILE_SPEED = 550;
-export const MAX_HEALTH = 100;
+export const MAX_HEALTH = 1000;
+export const MAX_MANA = 100;
+export const MANA_REGEN_PER_SECOND = 20;
+export const MANA_COST_SHOT = 20;
+export const MANA_COST_BLOCK = 20;
 export const DAMAGE = 15;
 export const BLOCK_SIZE = 32;
 export const MATCH_DURATION = 300; // 5 minutes in seconds
@@ -34,6 +38,8 @@ export interface PlatformDef {
 export const PLATFORMS: PlatformDef[] = [
     // Left island ground
     { x: 0, y: GROUND_Y, width: LEFT_ZONE_WIDTH, height: GROUND_HEIGHT, side: 'left' },
+    // Center ground (remove valley gap)
+    { x: LEFT_ZONE_WIDTH, y: GROUND_Y, width: CENTER_GAP_WIDTH, height: GROUND_HEIGHT, side: 'left' },
     // Left floating platforms
     { x: 70, y: 580, width: 130, height: 22, side: 'left' },
     { x: 240, y: 500, width: 150, height: 22, side: 'left' },

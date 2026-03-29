@@ -14,13 +14,174 @@ const ARENA = {
     height: 900,
 };
 
-const PLAYER_SPEED = 280;
-const PLAYER_RADIUS = 18;
-const SHOT_SPEED = 720;
-const SHOT_RADIUS = 6;
-const SHOT_DAMAGE = 20;
-const SHOT_COOLDOWN_MS = 280;
+const PLAYER_WIDTH = 30;
+const PLAYER_HEIGHT = 46;
+const PLAYER_SPEED = 200;
+const PLAYER_JUMP_FORCE = -450;
+const PLAYER_GRAVITY = 800;
+const SHOT_SPEED = 550;
+const SHOT_SPEED_MULTIPLIER = 1.25;
+const SHOT_RADIUS = 8;
+const PROJECTILE_GRAVITY_SCALE = 0.18;
+const SHOT_DAMAGE = 15;
+const SHOT_COOLDOWN_MS = 180;
 const MATCH_DURATION_MS = 3 * 60 * 1000;
+const BLOCK_SIZE = 32;
+const BLOCK_PLACE_COOLDOWN_MS = 160;
+const BLOCK_COST_MANA = 20;
+const SHOT_COST_MANA = 20;
+const MANA_REGEN_PER_SECOND = 20;
+const BLOCK_DAMAGE = 30;
+const MAX_HEALTH = 1000;
+const MAX_MANA = 100;
+
+const DEFAULT_LOADOUT = ['Fe', 'Cu', 'Zn'];
+const STARTING_INVENTORY = {
+    Fe: 5,
+    Cu: 4,
+    Zn: 4,
+    K: 4,
+    Br: 4,
+    Kr: 3,
+    Ag: 3,
+    Xe: 3,
+    Fr: 2,
+    Ra: 2,
+    Rf: 2,
+};
+
+const ELEMENTS = {
+    Fe: { color: 0xa8a8a8, hp: 60, special: null },
+    Cu: { color: 0xc8834a, hp: 46, special: null },
+    Zn: { color: 0xc8c8d4, hp: 42, special: null },
+    K: { color: 0xd1c46a, hp: 38, special: null },
+    Br: { color: 0xb86a43, hp: 35, special: 'explode' },
+    Kr: { color: 0x86d5cf, hp: 42, special: null },
+    Ag: { color: 0xd9dce3, hp: 46, special: null },
+    Xe: { color: 0x8cced6, hp: 43, special: null },
+    Fr: { color: 0xe6d99f, hp: 36, special: null },
+    Ra: { color: 0xd9b77d, hp: 45, special: null },
+    Rf: { color: 0xd19fc0, hp: 58, special: null },
+};
+
+function ensureLoadout(loadout) {
+    const incoming = Array.isArray(loadout)
+        ? loadout.map((v) => String(v || '').trim()).filter(Boolean)
+        : [];
+    const unique = [];
+    for (const key of incoming) {
+        if (!unique.includes(key)) unique.push(key);
+        if (unique.length >= 3) break;
+    }
+    while (unique.length < 3) {
+        const fallback = DEFAULT_LOADOUT[unique.length] ?? DEFAULT_LOADOUT[0];
+        if (!unique.includes(fallback)) unique.push(fallback);
+        else break;
+    }
+    return unique.slice(0, 3);
+}
+
+function getElementDef(symbol) {
+    const known = ELEMENTS[symbol];
+    if (known) return known;
+    let hash = 0;
+    for (let i = 0; i < symbol.length; i++) {
+        hash = ((hash << 5) - hash) + symbol.charCodeAt(i);
+        hash |= 0;
+    }
+    const hue = Math.abs(hash) % 360;
+    const color = Number.parseInt(`0x${hsvToHex(hue / 360, 0.66, 0.9)}`, 16);
+    return { color, hp: 42, special: null };
+}
+
+function getCharacterHitbox(player) {
+    const baseX = player.x + player.w / 2;
+    const baseY = player.y + player.h + 2;
+    const hitboxWidth = 52;
+    const hitboxHeight = player.crouching ? 92 : 102;
+
+    return {
+        x: baseX - hitboxWidth / 2,
+        y: baseY - hitboxHeight,
+        w: hitboxWidth,
+        h: hitboxHeight,
+    };
+}
+
+function getGunMuzzlePosition(player) {
+    const spriteX = player.x + player.w / 2;
+    const spriteBaseY = player.y + player.h + 2;
+    const muzzleXOffset = player.facingRight ? 18 : -18;
+    const muzzleYOffset = player.crouching ? -50 : -60;
+
+    return {
+        x: spriteX + muzzleXOffset,
+        y: spriteBaseY + muzzleYOffset,
+    };
+}
+
+function getAimAngleDeg(player, aimX, aimY) {
+    const muzzle = getGunMuzzlePosition(player);
+    const dx = aimX - muzzle.x;
+    const dy = aimY - muzzle.y;
+    const angleRad = Math.atan2(-dy, Math.max(1, Math.abs(dx)));
+    const angleDeg = angleRad * (180 / Math.PI);
+    return Math.max(0, Math.min(90, angleDeg));
+}
+
+function getNearestEnemy(players, self) {
+    let nearest = null;
+    let best = Infinity;
+    for (const other of players.values()) {
+        if (!other.alive || other.team === self.team) continue;
+        const d = Math.abs((other.x + other.w / 2) - (self.x + self.w / 2));
+        if (d < best) {
+            best = d;
+            nearest = other;
+        }
+    }
+    return nearest;
+}
+
+function hsvToHex(h, s, v) {
+    let r = 0;
+    let g = 0;
+    let b = 0;
+    const i = Math.floor(h * 6);
+    const f = h * 6 - i;
+    const p = v * (1 - s);
+    const q = v * (1 - f * s);
+    const t = v * (1 - (1 - f) * s);
+    switch (i % 6) {
+        case 0: r = v; g = t; b = p; break;
+        case 1: r = q; g = v; b = p; break;
+        case 2: r = p; g = v; b = t; break;
+        case 3: r = p; g = q; b = v; break;
+        case 4: r = t; g = p; b = v; break;
+        case 5: r = v; g = p; b = q; break;
+    }
+    const toHex = (value) => Math.round(value * 255).toString(16).padStart(2, '0');
+    return `${toHex(r)}${toHex(g)}${toHex(b)}`;
+}
+
+const GROUND_Y = 700;
+const LEFT_ZONE_WIDTH = 520;
+const CENTER_GAP_WIDTH = 560;
+const RIGHT_ZONE_START = LEFT_ZONE_WIDTH + CENTER_GAP_WIDTH;
+
+const PLATFORMS = [
+    { x: 0, y: GROUND_Y, width: LEFT_ZONE_WIDTH, height: 200 },
+    { x: LEFT_ZONE_WIDTH, y: GROUND_Y, width: CENTER_GAP_WIDTH, height: 200 },
+    { x: 70, y: 580, width: 130, height: 22 },
+    { x: 240, y: 500, width: 150, height: 22 },
+    { x: 100, y: 410, width: 130, height: 22 },
+    { x: 300, y: 320, width: 130, height: 22 },
+    { x: RIGHT_ZONE_START, y: GROUND_Y, width: LEFT_ZONE_WIDTH, height: 200 },
+    { x: 1410, y: 580, width: 130, height: 22 },
+    { x: 1210, y: 500, width: 150, height: 22 },
+    { x: 1370, y: 410, width: 130, height: 22 },
+    { x: 1170, y: 320, width: 130, height: 22 },
+];
 
 const httpServer = createServer();
 const io = new Server(httpServer, {
@@ -109,8 +270,8 @@ function teamForIndex(idx, mode) {
 function spawnPoint(team, slot, mode) {
     const half = MODE_SIZE[mode] / 2;
     const perTeamIndex = slot % half;
-    const spacing = 140;
-    const y = 220 + perTeamIndex * spacing;
+    const spacing = 120;
+    const y = GROUND_Y - PLAYER_HEIGHT - perTeamIndex * spacing;
     return {
         x: team === 'A' ? 160 : ARENA.width - 160,
         y,
@@ -126,6 +287,7 @@ function createRoom(mode, sockets) {
         over: false,
         players: new Map(),
         projectiles: [],
+        blocks: [],
     };
 
     sockets.forEach((socketId, idx) => {
@@ -136,24 +298,44 @@ function createRoom(mode, sockets) {
         const pos = spawnPoint(team, idx, mode);
         const name = socket.data.nickname || `Player-${socketId.slice(0, 4)}`;
 
+        const selectedElements = ensureLoadout(socket.data.selectedElements);
+        const inventory = {};
+        for (const symbol of selectedElements) {
+            inventory[symbol] = STARTING_INVENTORY[symbol] ?? 3;
+        }
+
         room.players.set(socketId, {
             id: socketId,
             name,
             team,
             x: pos.x,
             y: pos.y,
-            hp: 100,
+            w: PLAYER_WIDTH,
+            h: PLAYER_HEIGHT,
+            vx: 0,
+            vy: 0,
+            onGround: true,
+            facingRight: team === 'A',
+            crouching: false,
+            hp: MAX_HEALTH,
+            mana: MAX_MANA,
             alive: true,
+            selectedElements,
+            selectedElement: selectedElements[0],
+            inventory,
             input: {
                 left: false,
                 right: false,
                 up: false,
                 down: false,
                 shoot: false,
+                build: false,
                 aimX: pos.x,
                 aimY: pos.y,
+                selectedElement: selectedElements[0],
             },
             lastShotAt: 0,
+            lastBuildAt: 0,
         });
 
         socket.join(roomId);
@@ -187,39 +369,126 @@ function updateRoom(room, dtMs) {
     for (const p of room.players.values()) {
         if (!p.alive) continue;
 
-        const dx = (p.input.right ? 1 : 0) - (p.input.left ? 1 : 0);
-        const dy = (p.input.down ? 1 : 0) - (p.input.up ? 1 : 0);
-        const len = Math.hypot(dx, dy) || 1;
+        p.mana = Math.min(MAX_MANA, p.mana + MANA_REGEN_PER_SECOND * (dtMs / 1000));
+        p.crouching = Boolean(p.input.down);
 
-        p.x += ((dx / len) * PLAYER_SPEED * dtMs) / 1000;
-        p.y += ((dy / len) * PLAYER_SPEED * dtMs) / 1000;
+        if (p.input.selectedElement && p.selectedElements.includes(p.input.selectedElement)) {
+            p.selectedElement = p.input.selectedElement;
+        }
 
-        p.x = Math.max(PLAYER_RADIUS, Math.min(ARENA.width - PLAYER_RADIUS, p.x));
-        p.y = Math.max(PLAYER_RADIUS, Math.min(ARENA.height - PLAYER_RADIUS, p.y));
+        if (p.input.left) {
+            p.vx = -PLAYER_SPEED;
+        }
+        if (p.input.right) {
+            p.vx = PLAYER_SPEED;
+        }
 
-        if (p.input.shoot && now - p.lastShotAt >= SHOT_COOLDOWN_MS) {
-            const ax = p.input.aimX - p.x;
-            const ay = p.input.aimY - p.y;
-            const ad = Math.hypot(ax, ay) || 1;
+        if (p.input.up && p.onGround) {
+            p.vy = PLAYER_JUMP_FORCE;
+            p.onGround = false;
+        }
+
+        p.vy += PLAYER_GRAVITY * (dtMs / 1000);
+        p.x += p.vx * (dtMs / 1000);
+        p.y += p.vy * (dtMs / 1000);
+
+        p.onGround = false;
+        for (const plat of PLATFORMS) {
+            if (
+                p.x < plat.x + plat.width &&
+                p.x + p.w > plat.x &&
+                p.y + p.h >= plat.y &&
+                p.y + p.h <= plat.y + plat.height + p.vy * (dtMs / 1000) + 5 &&
+                p.vy > 0
+            ) {
+                p.y = plat.y - p.h;
+                p.vy = 0;
+                p.onGround = true;
+            }
+        }
+
+        for (const blk of room.blocks) {
+            if (
+                p.x < blk.x + blk.w &&
+                p.x + p.w > blk.x &&
+                p.y + p.h >= blk.y &&
+                p.y + p.h <= blk.y + blk.h + p.vy * (dtMs / 1000) + 5 &&
+                p.vy > 0
+            ) {
+                p.y = blk.y - p.h;
+                p.vy = 0;
+                p.onGround = true;
+            }
+        }
+
+        p.x = Math.max(0, Math.min(ARENA.width - p.w, p.x));
+        p.y = Math.max(0, Math.min(ARENA.height - p.h, p.y));
+        p.vx *= 0.85;
+
+        const nearestEnemy = getNearestEnemy(room.players, p);
+        if (nearestEnemy) {
+            p.facingRight = (nearestEnemy.x + nearestEnemy.w / 2) >= (p.x + p.w / 2);
+        }
+
+        if (p.input.build && now - p.lastBuildAt >= BLOCK_PLACE_COOLDOWN_MS && p.mana >= BLOCK_COST_MANA) {
+            const elementKey = p.selectedElement;
+            const inventoryCount = p.inventory[elementKey] ?? 0;
+            if (inventoryCount > 0) {
+                const bx = (p.facingRight
+                    ? Math.floor((p.x + p.w) / BLOCK_SIZE)
+                    : Math.floor((p.x - BLOCK_SIZE) / BLOCK_SIZE)) * BLOCK_SIZE;
+                const by = Math.floor((p.y + p.h - BLOCK_SIZE) / BLOCK_SIZE) * BLOCK_SIZE;
+
+                const blocked = room.blocks.some((blk) => blk.x === bx && blk.y === by);
+                if (!blocked && bx >= 0 && bx <= ARENA.width - BLOCK_SIZE && by >= 0 && by <= ARENA.height - BLOCK_SIZE) {
+                    const def = getElementDef(elementKey);
+                    room.blocks.push({
+                        x: bx,
+                        y: by,
+                        w: BLOCK_SIZE,
+                        h: BLOCK_SIZE,
+                        element: elementKey,
+                        hp: def.hp,
+                        maxHp: def.hp,
+                        team: p.team,
+                    });
+                    p.inventory[elementKey] = Math.max(0, inventoryCount - 1);
+                    p.mana = Math.max(0, p.mana - BLOCK_COST_MANA);
+                    p.lastBuildAt = now;
+                }
+            }
+        }
+
+        if (p.input.shoot && now - p.lastShotAt >= SHOT_COOLDOWN_MS && p.mana >= SHOT_COST_MANA) {
+            const muzzle = getGunMuzzlePosition(p);
+            const angle = getAimAngleDeg(p, p.input.aimX, p.input.aimY);
+            const rad = (angle * Math.PI) / 180;
+            const dir = p.facingRight ? 1 : -1;
+            const speed = SHOT_SPEED * SHOT_SPEED_MULTIPLIER;
+            const shotElement = p.selectedElements[Math.floor(Math.random() * p.selectedElements.length)] ?? p.selectedElement;
 
             room.projectiles.push({
                 id: `${p.id}_${now}_${Math.floor(Math.random() * 999)}`,
                 ownerId: p.id,
                 team: p.team,
-                x: p.x,
-                y: p.y,
-                vx: (ax / ad) * SHOT_SPEED,
-                vy: (ay / ad) * SHOT_SPEED,
+                x: muzzle.x,
+                y: muzzle.y,
+                vx: Math.cos(rad) * speed * dir,
+                vy: -Math.sin(rad) * speed,
+                element: shotElement,
             });
 
             p.lastShotAt = now;
+            p.mana = Math.max(0, p.mana - SHOT_COST_MANA);
         }
 
         p.input.shoot = false;
+        p.input.build = false;
     }
 
     const nextProjectiles = [];
     for (const b of room.projectiles) {
+        b.vy += PLAYER_GRAVITY * PROJECTILE_GRAVITY_SCALE * (dtMs / 1000);
         b.x += (b.vx * dtMs) / 1000;
         b.y += (b.vy * dtMs) / 1000;
 
@@ -228,10 +497,64 @@ function updateRoom(room, dtMs) {
         }
 
         let consumed = false;
+
+        for (const plat of PLATFORMS) {
+            if (
+                b.x >= plat.x &&
+                b.x <= plat.x + plat.width &&
+                b.y >= plat.y &&
+                b.y <= plat.y + plat.height
+            ) {
+                consumed = true;
+                break;
+            }
+        }
+
+        if (consumed) {
+            continue;
+        }
+
+        for (let i = room.blocks.length - 1; i >= 0; i--) {
+            const blk = room.blocks[i];
+            if (
+                b.x >= blk.x &&
+                b.x <= blk.x + blk.w &&
+                b.y >= blk.y &&
+                b.y <= blk.y + blk.h
+            ) {
+                blk.hp -= BLOCK_DAMAGE;
+                if (blk.hp <= 0) {
+                    if (getElementDef(blk.element).special === 'explode') {
+                        for (const p of room.players.values()) {
+                            if (!p.alive) continue;
+                            const dx = (p.x + p.w / 2) - (blk.x + blk.w / 2);
+                            const dy = (p.y + p.h / 2) - (blk.y + blk.h / 2);
+                            if (Math.hypot(dx, dy) < 80) {
+                                p.hp = Math.max(0, p.hp - 20);
+                                if (p.hp <= 0) p.alive = false;
+                            }
+                        }
+                    }
+                    room.blocks.splice(i, 1);
+                }
+                consumed = true;
+                break;
+            }
+        }
+
+        if (consumed) {
+            continue;
+        }
+
         for (const p of room.players.values()) {
             if (!p.alive || p.team === b.team) continue;
-            const dist = Math.hypot(p.x - b.x, p.y - b.y);
-            if (dist <= PLAYER_RADIUS + SHOT_RADIUS) {
+            const hitbox = getCharacterHitbox(p);
+            const hit =
+                b.x >= hitbox.x &&
+                b.x <= hitbox.x + hitbox.w &&
+                b.y >= hitbox.y &&
+                b.y <= hitbox.y + hitbox.h;
+            if (hit) {
                 p.hp = Math.max(0, p.hp - SHOT_DAMAGE);
                 if (p.hp <= 0) p.alive = false;
                 consumed = true;
@@ -286,11 +609,31 @@ function updateRoom(room, dtMs) {
                 name: p.name,
                 x: p.x,
                 y: p.y,
+                vx: p.vx,
+                vy: p.vy,
+                w: p.w,
+                h: p.h,
                 hp: p.hp,
+                mana: p.mana,
                 team: p.team,
                 alive: p.alive,
+                facingRight: p.facingRight,
+                crouching: p.crouching,
+                selectedElements: p.selectedElements,
+                selectedElement: p.selectedElement,
+                inventory: p.inventory,
             })),
-            projectiles: room.projectiles.map((b) => ({ id: b.id, x: b.x, y: b.y, team: b.team })),
+            projectiles: room.projectiles.map((b) => ({ id: b.id, x: b.x, y: b.y, vx: b.vx, vy: b.vy, team: b.team, element: b.element })),
+            blocks: room.blocks.map((blk) => ({
+                x: blk.x,
+                y: blk.y,
+                w: blk.w,
+                h: blk.h,
+                element: blk.element,
+                hp: blk.hp,
+                maxHp: blk.maxHp,
+                team: blk.team,
+            })),
             remainingMs,
         },
     });
@@ -432,15 +775,28 @@ io.on('connection', (socket) => {
         startCustomRoomMatch(normalizedCode, socket.id);
     });
 
-    socket.on('join_room_runtime', ({ roomId }) => {
+    socket.on('join_room_runtime', ({ roomId, selectedElements }) => {
         if (!roomId || !rooms.has(roomId)) return;
         socket.join(roomId);
+        const room = rooms.get(roomId);
+        const player = room?.players.get(socket.id);
+        if (player) {
+            const loadout = ensureLoadout(selectedElements);
+            player.selectedElements = loadout;
+            player.selectedElement = loadout[0];
+            const nextInventory = {};
+            for (const symbol of loadout) {
+                nextInventory[symbol] = player.inventory[symbol] ?? STARTING_INVENTORY[symbol] ?? 3;
+            }
+            player.inventory = nextInventory;
+            socket.data.selectedElements = loadout;
+        }
     });
 
     socket.on('player_input', ({ roomId, playerId, input }) => {
         const room = rooms.get(roomId);
         if (!room || room.over) return;
-        const player = room.players.get(playerId);
+        const player = room.players.get(socket.id) ?? room.players.get(playerId);
         if (!player) return;
 
         player.input = {
@@ -449,8 +805,10 @@ io.on('connection', (socket) => {
             up: Boolean(input.up),
             down: Boolean(input.down),
             shoot: Boolean(input.shoot),
+            build: Boolean(input.build),
             aimX: Number(input.aimX || 0),
             aimY: Number(input.aimY || 0),
+            selectedElement: String(input.selectedElement || ''),
         };
     });
 
@@ -477,7 +835,7 @@ setInterval(() => {
     for (const room of rooms.values()) {
         updateRoom(room, dtMs);
     }
-}, 33);
+}, 16);
 
 httpServer.listen(PORT, '0.0.0.0', () => {
     console.log(`[match-server] listening on 0.0.0.0:${PORT}`);

@@ -38,7 +38,7 @@ interface RoomStatePayload {
     requiredPlayers: number;
 }
 
-type MatchTab = 'queue' | 'room';
+type MatchView = 'select' | 'queue' | 'room';
 
 const MODE_LABEL: Record<Exclude<GameMode, 'vs-ai'>, string> = {
     'pvp-1v1': 'PVP 1v1',
@@ -47,10 +47,10 @@ const MODE_LABEL: Record<Exclude<GameMode, 'vs-ai'>, string> = {
 };
 
 export function MatchmakingScreen({ mode, nickname, onBack, onMatched }: MatchmakingScreenProps) {
-    const [tab, setTab] = useState<MatchTab>('queue');
-    const tabRef = useRef<MatchTab>(tab);
-    const [queueCount, setQueueCount] = useState(1);
-    const [status, setStatus] = useState('Dang tim tran...');
+    const [view, setView] = useState<MatchView>('select');
+    const viewRef = useRef<MatchView>(view);
+    const [queueCount, setQueueCount] = useState(0);
+    const [status, setStatus] = useState('Chon che do de bat dau.');
     const [connectionStatus, setConnectionStatus] = useState('Dang ket noi server...');
     const [roomCodeInput, setRoomCodeInput] = useState('');
     const [roomState, setRoomState] = useState<RoomStatePayload | null>(null);
@@ -60,8 +60,8 @@ export function MatchmakingScreen({ mode, nickname, onBack, onMatched }: Matchma
 
     const modeLabel = useMemo(() => MODE_LABEL[mode], [mode]);
 
-    // Keep tabRef in sync so cleanup closures always read the latest value
-    useEffect(() => { tabRef.current = tab; }, [tab]);
+    // Keep viewRef in sync so cleanup closures always read the latest value
+    useEffect(() => { viewRef.current = view; }, [view]);
 
     useEffect(() => {
         const socket = getMatchSocket();
@@ -69,7 +69,7 @@ export function MatchmakingScreen({ mode, nickname, onBack, onMatched }: Matchma
         const handleConnect = () => {
             setSelfId(socket.id ?? '');
             setConnectionStatus('Da ket noi matchmaking server');
-            if (tabRef.current === 'queue') {
+            if (viewRef.current === 'queue') {
                 setStatus('Dang tim tran...');
                 socket.emit('join_queue', { mode, nickname });
             }
@@ -94,7 +94,7 @@ export function MatchmakingScreen({ mode, nickname, onBack, onMatched }: Matchma
         };
 
         const handleRoomCreated = (payload: RoomStatePayload) => {
-            setTab('room');
+            setView('room');
             setRoomState(payload);
             setStatus('Da tao phong. Cho ban vao...');
         };
@@ -121,9 +121,9 @@ export function MatchmakingScreen({ mode, nickname, onBack, onMatched }: Matchma
         }
 
         return () => {
-            if (tabRef.current === 'queue') {
+            if (viewRef.current === 'queue') {
                 socket.emit('leave_queue', { mode });
-            } else {
+            } else if (viewRef.current === 'room') {
                 socket.emit('leave_custom_room', {});
             }
             socket.off('connect', handleConnect);
@@ -141,17 +141,25 @@ export function MatchmakingScreen({ mode, nickname, onBack, onMatched }: Matchma
         const socket = getMatchSocket();
         if (!socket.connected) return;
 
-        if (tab === 'queue') {
-            setRoomState(null);
+        if (view === 'queue') {
             setStatus('Dang tim tran...');
             socket.emit('leave_custom_room', {});
             socket.emit('join_queue', { mode, nickname });
             return;
         }
 
+        if (view === 'room') {
+            socket.emit('leave_queue', { mode });
+            setQueueCount(0);
+            return;
+        }
+
         socket.emit('leave_queue', { mode });
+        socket.emit('leave_custom_room', {});
+        setRoomState(null);
         setQueueCount(0);
-    }, [tab, mode, nickname]);
+        setStatus('Chon che do de bat dau.');
+    }, [view, mode, nickname]);
 
     const handleCreateRoom = () => {
         const socket = getMatchSocket();
@@ -183,6 +191,19 @@ export function MatchmakingScreen({ mode, nickname, onBack, onMatched }: Matchma
         socket.emit('start_custom_room', { roomCode: roomState.roomCode });
     };
 
+    const handleChooseQueue = () => {
+        setView('queue');
+    };
+
+    const handleChooseRoom = () => {
+        setView('room');
+        setStatus('Tao phong moi hoac nhap ma de vao phong.');
+    };
+
+    const handleBackToSelect = () => {
+        setView('select');
+    };
+
     const isHost = roomState?.hostId === selfId;
     const canStartRoom = Boolean(roomState && roomState.members.length >= roomState.requiredPlayers && isHost);
 
@@ -190,27 +211,41 @@ export function MatchmakingScreen({ mode, nickname, onBack, onMatched }: Matchma
         <div className="matchmaking-root">
             <div className="matchmaking-card">
                 <h2>{modeLabel}</h2>
-                <div className="match-tabs">
-                    <button className={`tab-btn ${tab === 'queue' ? 'active' : ''}`} onClick={() => setTab('queue')}>Ghep tran nhanh</button>
-                    <button className={`tab-btn ${tab === 'room' ? 'active' : ''}`} onClick={() => setTab('room')}>Phong ban be</button>
-                </div>
-
                 <p>{status}</p>
-                <p className="meta">Nguoi choi trong hang doi: {queueCount}</p>
                 <p className="meta">{connectionStatus}</p>
                 <p className="meta">Match server: {serverUrl}</p>
                 {connectionStatus.includes('Khong ket noi duoc server') && (
                     <p className="meta">
-                        Goi y: chay `npm --prefix ".../260311-demogame" run match:server` va mo game bang IP host neu choi 2 may.
+                        Goi y: chay `npm --prefix "./bitchemical" run match:server`, sau do mo 2 tab tren cung may de choi chung.
                     </p>
                 )}
                 {isLocalServer && (
                     <p className="meta">
-                        Ban dang dung localhost. Neu choi 2 may, hay mo bang IP LAN + ?matchServer=http://IP_HOST:3001
+                        Ban dang dung localhost. Ban co the mo 2 tab tren cung may de choi cung nhau ngay.
                     </p>
                 )}
 
-                {tab === 'room' && (
+                <div className="match-choice-grid">
+                    <button className={`match-choice-window ${view === 'queue' ? 'active' : ''}`} onClick={handleChooseQueue}>
+                        <span className="choice-icon">⚡</span>
+                        <span className="choice-title">Ghep Tran</span>
+                        <span className="choice-desc">Vao hang doi va tim tran nhanh theo mode da chon.</span>
+                    </button>
+                    <button className={`match-choice-window ${view === 'room' ? 'active' : ''}`} onClick={handleChooseRoom}>
+                        <span className="choice-icon">🏠</span>
+                        <span className="choice-title">Tao Phong</span>
+                        <span className="choice-desc">Tao phong rieng, chia se ma hoac vao phong ban be.</span>
+                    </button>
+                </div>
+
+                {view === 'queue' && (
+                    <div className="room-panel queue-panel">
+                        <p className="meta">Nguoi choi trong hang doi: {queueCount}</p>
+                        <p className="hint">Dang ghep tran cho {modeLabel}...</p>
+                    </div>
+                )}
+
+                {view === 'room' && (
                     <div className="room-panel">
                         {!roomState && (
                             <>
@@ -247,6 +282,9 @@ export function MatchmakingScreen({ mode, nickname, onBack, onMatched }: Matchma
                 )}
 
                 <p className="hint">Nickname: {nickname}</p>
+                {view !== 'select' && (
+                    <button className="back-btn secondary" onClick={handleBackToSelect}>Quay lai lua chon</button>
+                )}
                 <button className="back-btn" onClick={onBack}>Quay lai</button>
             </div>
         </div>

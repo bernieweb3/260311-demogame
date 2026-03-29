@@ -31,7 +31,7 @@ export function GameCanvas({
         if (!containerRef.current || gameRef.current) return;
 
         const isMultiplayer = gameMode !== 'vs-ai';
-        const scenes = isMultiplayer ? [MultiplayerBattleScene] : [BootScene, BattleScene];
+        const scenes = isMultiplayer ? [BootScene, MultiplayerBattleScene] : [BootScene, BattleScene];
 
         const config: Phaser.Types.Core.GameConfig = {
             type: Phaser.CANVAS,
@@ -53,6 +53,13 @@ export function GameCanvas({
                     game.registry.set('selectedElements', selectedElements);
                     game.registry.set('selectedElementImageUrls', selectedElementImageUrls);
                     game.registry.set('multiplayerMatch', multiplayerMatch);
+                    game.registry.set('gameplayScene', isMultiplayer ? 'MultiplayerBattleScene' : 'BattleScene');
+                    game.registry.set('multiplayerInitData', isMultiplayer ? {
+                        roomId: multiplayerMatch?.roomId,
+                        mode: multiplayerMatch?.mode,
+                        playerId: multiplayerMatch?.playerId,
+                        team: multiplayerMatch?.team,
+                    } : null);
                 },
             },
         };
@@ -75,16 +82,7 @@ export function GameCanvas({
             }
         });
 
-        if (!isMultiplayer) {
-            game.scene.start('BootScene');
-        } else if (multiplayerMatch) {
-            game.scene.start('MultiplayerBattleScene', {
-                roomId: multiplayerMatch.roomId,
-                mode: multiplayerMatch.mode,
-                playerId: multiplayerMatch.playerId,
-                team: multiplayerMatch.team,
-            });
-        }
+        game.scene.start('BootScene');
 
         // Listen for scene start to pass callback
         game.events.on('step', () => {

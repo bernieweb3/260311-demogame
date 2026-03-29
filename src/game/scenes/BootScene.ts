@@ -1,9 +1,19 @@
 import Phaser from 'phaser';
-import idle1Url from '../../../img/dungim1.png';
-import idle2Url from '../../../img/dungim2.png';
 import { ELEMENTS } from '../data/elements';
 
 const rawElementImageUrls = import.meta.glob('../../../img/nguyento/*.svg', {
+    eager: true,
+    query: '?url',
+    import: 'default',
+}) as Record<string, string>;
+
+const rawIdleImageUrls = import.meta.glob('../../../img/player/dungyen/*.svg', {
+    eager: true,
+    query: '?url',
+    import: 'default',
+}) as Record<string, string>;
+
+const rawRunImageUrls = import.meta.glob('../../../img/player/chay/*.svg', {
     eager: true,
     query: '?url',
     import: 'default',
@@ -142,9 +152,22 @@ function resolveElementImageUrl(symbol: string) {
     return null;
 }
 
-const IDLE_1_KEY = 'scientist_idle_1';
-const IDLE_2_KEY = 'scientist_idle_2';
+const IDLE_FRAME_KEY_PREFIX = 'scientist_idle_frame_';
+const RUN_FRAME_KEY_PREFIX = 'scientist_run_frame_';
 const IDLE_ANIM_KEY = 'scientist_idle';
+const RUN_ANIM_KEY = 'scientist_run';
+
+function buildSortedFrameAssets(rawUrls: Record<string, string>) {
+    return Object.entries(rawUrls)
+        .sort(([a], [b]) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }))
+        .map(([path, url]) => {
+            const fileName = path.split('/').pop() ?? path;
+            return { fileName, url };
+        });
+}
+
+const IDLE_FRAME_ASSETS = buildSortedFrameAssets(rawIdleImageUrls);
+const RUN_FRAME_ASSETS = buildSortedFrameAssets(rawRunImageUrls);
 
 export class BootScene extends Phaser.Scene {
     private selectedElementsForProjectile: string[] = [];
@@ -154,8 +177,12 @@ export class BootScene extends Phaser.Scene {
     }
 
     preload() {
-        this.load.image(IDLE_1_KEY, idle1Url);
-        this.load.image(IDLE_2_KEY, idle2Url);
+        IDLE_FRAME_ASSETS.forEach((asset, index) => {
+            this.load.image(`${IDLE_FRAME_KEY_PREFIX}${index}`, asset.url);
+        });
+        RUN_FRAME_ASSETS.forEach((asset, index) => {
+            this.load.image(`${RUN_FRAME_KEY_PREFIX}${index}`, asset.url);
+        });
 
         const selectedElements = (this.registry.get('selectedElements') as string[] | undefined) ?? [];
         this.selectedElementsForProjectile = selectedElements.slice(0, 3).map((s) => s.trim()).filter(Boolean);
@@ -182,6 +209,17 @@ export class BootScene extends Phaser.Scene {
             this.createProjectileDisplayTexture(symbol);
         });
         const selectedElements = this.registry.get('selectedElements') as string[] | undefined;
+        const gameplayScene = (this.registry.get('gameplayScene') as string | undefined) ?? 'BattleScene';
+        const multiplayerInitData = (this.registry.get('multiplayerInitData') as Record<string, unknown> | undefined) ?? {};
+
+        if (gameplayScene === 'MultiplayerBattleScene') {
+            this.scene.start('MultiplayerBattleScene', {
+                ...multiplayerInitData,
+                selectedElements,
+            });
+            return;
+        }
+
         this.scene.start('BattleScene', { selectedElements });
     }
 
@@ -317,11 +355,20 @@ export class BootScene extends Phaser.Scene {
     }
 
     private createCharacterAnimation() {
-        if (!this.anims.exists(IDLE_ANIM_KEY)) {
+        if (!this.anims.exists(IDLE_ANIM_KEY) && IDLE_FRAME_ASSETS.length > 0) {
             this.anims.create({
                 key: IDLE_ANIM_KEY,
-                frames: [{ key: IDLE_1_KEY }, { key: IDLE_2_KEY }],
-                frameRate: 3,
+                frames: IDLE_FRAME_ASSETS.map((_, index) => ({ key: `${IDLE_FRAME_KEY_PREFIX}${index}` })),
+                frameRate: 4,
+                repeat: -1,
+            });
+        }
+
+        if (!this.anims.exists(RUN_ANIM_KEY) && RUN_FRAME_ASSETS.length > 0) {
+            this.anims.create({
+                key: RUN_ANIM_KEY,
+                frames: RUN_FRAME_ASSETS.map((_, index) => ({ key: `${RUN_FRAME_KEY_PREFIX}${index}` })),
+                frameRate: 22,
                 repeat: -1,
             });
         }

@@ -2,7 +2,6 @@ import Phaser from 'phaser';
 import {
     GAME_WIDTH,
     GAME_HEIGHT,
-    LEFT_ZONE_WIDTH,
     RIGHT_ZONE_START,
     GROUND_Y,
     GROUND_HEIGHT,
@@ -11,12 +10,20 @@ import {
     MOVE_SPEED,
     PROJECTILE_SPEED,
     MAX_HEALTH,
+    MAX_MANA,
+    MANA_REGEN_PER_SECOND,
+    MANA_COST_SHOT,
+    MANA_COST_BLOCK,
     DAMAGE,
     BLOCK_SIZE,
     MATCH_DURATION,
     PLATFORMS,
 } from '../config';
 import { ELEMENTS, ELEMENT_KEYS, STARTING_INVENTORY } from '../data/elements';
+
+const IDLE_TEXTURE_KEY = 'scientist_idle_frame_0';
+const IDLE_ANIM_KEY = 'scientist_idle';
+const RUN_ANIM_KEY = 'scientist_run';
 
 // ─── Interfaces ───────────────────────────────────────────────
 interface CharacterState {
@@ -27,6 +34,7 @@ interface CharacterState {
     width: number;
     height: number;
     health: number;
+    mana: number;
     onGround: boolean;
     crouching: boolean;
     facingRight: boolean;
@@ -211,10 +219,10 @@ export class BattleScene extends Phaser.Scene {
         this.gfx = this.add.graphics();
 
         // Character sprites (loaded in BootScene)
-        this.playerSprite = this.add.sprite(0, 0, 'scientist_idle_1').setDepth(30).setOrigin(0.5, 1);
-        this.aiSprite = this.add.sprite(0, 0, 'scientist_idle_1').setDepth(30).setOrigin(0.5, 1);
-        this.playerSprite.play('scientist_idle');
-        this.aiSprite.play('scientist_idle');
+        this.playerSprite = this.add.sprite(0, 0, IDLE_TEXTURE_KEY).setDepth(30).setOrigin(0.5, 1);
+        this.aiSprite = this.add.sprite(0, 0, IDLE_TEXTURE_KEY).setDepth(30).setOrigin(0.5, 1);
+        this.playerSprite.play(IDLE_ANIM_KEY);
+        this.aiSprite.play(IDLE_ANIM_KEY);
 
         // Input keys
         this.keyA = this.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.A);
@@ -289,7 +297,7 @@ export class BattleScene extends Phaser.Scene {
         });
         this.keyRight.on('down', () => {
             if (!this.buildMode || this.gameOver) return;
-            this.cursorGridX = Math.min(Math.floor(LEFT_ZONE_WIDTH / BLOCK_SIZE) - 1, this.cursorGridX + 1);
+            this.cursorGridX = Math.min(Math.floor((GAME_WIDTH - 1) / BLOCK_SIZE), this.cursorGridX + 1);
         });
 
         // Timer
@@ -316,7 +324,7 @@ export class BattleScene extends Phaser.Scene {
 
         return {
             x, y, velX: 0, velY: 0, width: 30, height: 46,
-            health: MAX_HEALTH, onGround: false, crouching: false,
+            health: MAX_HEALTH, mana: MAX_MANA, onGround: false, crouching: false,
             facingRight: side === 'left', side,
             animFrame: 0, animTimer: 0,
             inventory,
@@ -330,8 +338,10 @@ export class BattleScene extends Phaser.Scene {
 
         this.uiTexts.set('playerLabel', this.add.text(25, 23, 'PLAYER', { ...boldStyle }).setDepth(100));
         this.uiTexts.set('playerHp', this.add.text(150, 23, '', { ...boldStyle }).setDepth(100));
+        this.uiTexts.set('playerMana', this.add.text(150, 48, '', { ...boldStyle, color: '#4fc3f7' }).setDepth(100));
         this.uiTexts.set('aiLabel', this.add.text(GAME_WIDTH - 215, 23, 'AI', { ...boldStyle }).setDepth(100));
         this.uiTexts.set('aiHp', this.add.text(GAME_WIDTH - 55, 23, '', { ...boldStyle }).setDepth(100));
+        this.uiTexts.set('aiMana', this.add.text(GAME_WIDTH - 55, 48, '', { ...boldStyle, color: '#4fc3f7' }).setDepth(100));
 
         this.uiTexts.set('timer', this.add.text(GAME_WIDTH / 2, 30, '', {
             ...boldStyle, fontSize: '18px',
@@ -349,7 +359,7 @@ export class BattleScene extends Phaser.Scene {
         const instStyle = { fontFamily: '"Courier New", monospace', fontSize: '10px', color: '#bbbbbb' };
         this.uiTexts.set('inst1', this.add.text(22, GAME_HEIGHT - 82, 'WASD — Move / Jump / Crouch', instStyle).setDepth(100));
         this.uiTexts.set('inst2', this.add.text(22, GAME_HEIGHT - 68, 'CLICK — Shoot random 1 of your 3 bullets', instStyle).setDepth(100));
-        this.uiTexts.set('inst3', this.add.text(22, GAME_HEIGHT - 54, 'Q/E — Cycle element | SHIFT — Build block', instStyle).setDepth(100));
+        this.uiTexts.set('inst3', this.add.text(22, GAME_HEIGHT - 54, 'Q/E — Cycle element | SHIFT — Build block (uses mana)', instStyle).setDepth(100));
         this.uiTexts.set('inst4', this.add.text(22, GAME_HEIGHT - 40, 'Move mouse to aim | B + ↑↓←→ build cursor', instStyle).setDepth(100));
 
         // Element labels
@@ -403,11 +413,13 @@ export class BattleScene extends Phaser.Scene {
         this.drawBlocks();
 
         if (!this.gameOver) {
+            this.regenMana(dt);
             this.updateMouseAim();
             this.handleInput();
             this.updateChar(this.player, dt);
             this.updateAI(dt);
             this.updateChar(this.ai, dt);
+            this.enforceFacingTowardOpponent();
             this.updateProjectiles(dt);
             this.updateParticles(dt);
             this.updateCameraShake();
@@ -423,8 +435,8 @@ export class BattleScene extends Phaser.Scene {
 
     // ─── Input ───────────────────────────────────────────────
     private handleInput() {
-        if (this.keyA.isDown) { this.player.velX = -MOVE_SPEED; this.player.facingRight = false; }
-        if (this.keyD.isDown) { this.player.velX = MOVE_SPEED; this.player.facingRight = true; }
+        if (this.keyA.isDown) { this.player.velX = -MOVE_SPEED; }
+        if (this.keyD.isDown) { this.player.velX = MOVE_SPEED; }
         if (this.keyW.isDown && this.player.onGround) { this.player.velY = JUMP_FORCE; }
         this.player.crouching = this.keyS.isDown;
     }
@@ -447,10 +459,6 @@ export class BattleScene extends Phaser.Scene {
         this.aimTargetX = worldX;
         this.aimTargetY = worldY;
 
-        if (Math.abs(dx) > 1) {
-            this.player.facingRight = dx >= 0;
-        }
-
         const angleRad = Math.atan2(-dy, Math.max(1, Math.abs(dx)));
         const angleDeg = Phaser.Math.RadToDeg(angleRad);
         this.playerAimAngle = Phaser.Math.Clamp(angleDeg, 0, 90);
@@ -464,17 +472,35 @@ export class BattleScene extends Phaser.Scene {
         if (this.selectedShotKeys.length <= 0) {
             return;
         }
+        if (this.player.mana < MANA_COST_SHOT) {
+            return;
+        }
 
         const camera = this.cameras.main;
         const pointerWorldX = pointer.x + camera.scrollX;
         const pointerWorldY = pointer.y + camera.scrollY;
         this.applyAimTarget(pointerWorldX, pointerWorldY);
+        this.enforceFacingTowardOpponent();
 
         const shotElement = Phaser.Utils.Array.GetRandom(this.selectedShotKeys);
-        this.lastShotElement = shotElement;
+        const shotFired = this.shootProjectile(this.player, this.getCurrentPlayerAngle(), true, this.playerShotSpeedMultiplier, shotElement);
+        if (!shotFired) {
+            return;
+        }
 
+        this.lastShotElement = shotElement;
         this.lastPlayerShotAt = now;
-        this.shootProjectile(this.player, this.getCurrentPlayerAngle(), true, this.playerShotSpeedMultiplier, shotElement);
+    }
+
+    private regenMana(dt: number) {
+        const regenAmount = MANA_REGEN_PER_SECOND * dt;
+        this.player.mana = Phaser.Math.Clamp(this.player.mana + regenAmount, 0, MAX_MANA);
+        this.ai.mana = Phaser.Math.Clamp(this.ai.mana + regenAmount, 0, MAX_MANA);
+    }
+
+    private enforceFacingTowardOpponent() {
+        this.player.facingRight = this.ai.x >= this.player.x;
+        this.ai.facingRight = this.player.x >= this.ai.x;
     }
 
     private getCurrentPlayerAngle() {
@@ -523,11 +549,9 @@ export class BattleScene extends Phaser.Scene {
 
         c.onGround = false;
         for (const p of PLATFORMS) {
-            if (p.side === c.side || p.height > 50) {
-                if (c.x < p.x + p.width && c.x + c.width > p.x &&
-                    c.y + c.height >= p.y && c.y + c.height <= p.y + p.height + c.velY * dt + 5) {
-                    if (c.velY > 0) { c.y = p.y - c.height; c.velY = 0; c.onGround = true; }
-                }
+            if (c.x < p.x + p.width && c.x + c.width > p.x &&
+                c.y + c.height >= p.y && c.y + c.height <= p.y + p.height + c.velY * dt + 5) {
+                if (c.velY > 0) { c.y = p.y - c.height; c.velY = 0; c.onGround = true; }
             }
         }
         for (const b of this.blocks) {
@@ -537,13 +561,8 @@ export class BattleScene extends Phaser.Scene {
             }
         }
 
-        if (c.side === 'left') {
-            if (c.x < 0) c.x = 0;
-            if (c.x + c.width > LEFT_ZONE_WIDTH) c.x = LEFT_ZONE_WIDTH - c.width;
-        } else {
-            if (c.x < RIGHT_ZONE_START) c.x = RIGHT_ZONE_START;
-            if (c.x + c.width > GAME_WIDTH) c.x = GAME_WIDTH - c.width;
-        }
+        if (c.x < 0) c.x = 0;
+        if (c.x + c.width > GAME_WIDTH) c.x = GAME_WIDTH - c.width;
 
         c.velX *= 0.85;
         c.animTimer++;
@@ -556,22 +575,27 @@ export class BattleScene extends Phaser.Scene {
         const spriteScaleY = c.crouching ? 0.9 : 1;
 
         sprite.setPosition(baseX, baseY);
-        sprite.setDisplaySize(76, 108 * spriteScaleY);
+        sprite.setDisplaySize(92, 130 * spriteScaleY);
         sprite.setFlipX(!c.facingRight);
 
-        const isIdle = c.onGround && Math.abs(c.velX) < 20;
-        if (isIdle) {
-            if (!sprite.anims.isPlaying || sprite.anims.currentAnim?.key !== 'scientist_idle') {
-                sprite.play('scientist_idle');
+        const isRunning = c.onGround && Math.abs(c.velX) >= 20;
+        const targetAnim = isRunning ? RUN_ANIM_KEY : IDLE_ANIM_KEY;
+        if (this.anims.exists(targetAnim)) {
+            if (!sprite.anims.isPlaying || sprite.anims.currentAnim?.key !== targetAnim) {
+                sprite.play(targetAnim);
             }
         } else {
             sprite.anims.stop();
-            sprite.setTexture('scientist_idle_1');
+            sprite.setTexture(IDLE_TEXTURE_KEY);
         }
     }
 
     // ─── Shooting ───────────────────────────────────────────
     private shootProjectile(c: CharacterState, angle: number, isPlayer: boolean, speedMultiplier = 1, elementKey?: string) {
+        if (c.mana < MANA_COST_SHOT) {
+            return false;
+        }
+
         const rad = (angle * Math.PI) / 180;
         const dir = c.facingRight ? 1 : -1;
         const muzzle = this.getGunMuzzlePosition(c);
@@ -592,7 +616,7 @@ export class BattleScene extends Phaser.Scene {
         const textureKey = textureCandidates.find((key) => this.textures.exists(key));
 
         if (isPlayer && !textureKey) {
-            return;
+            return false;
         }
 
         const sprite = textureKey
@@ -623,6 +647,9 @@ export class BattleScene extends Phaser.Scene {
             active: true,
             trail: [],
         });
+
+        c.mana = Math.max(0, c.mana - MANA_COST_SHOT);
+        return true;
     }
 
     private getCharacterHitbox(c: CharacterState): CharacterHitbox {
@@ -785,6 +812,7 @@ export class BattleScene extends Phaser.Scene {
     private placeBlock() {
         const elem = ELEMENTS[this.selectedElement];
         if (this.player.inventory[this.selectedElement] <= 0) return;
+        if (this.player.mana < MANA_COST_BLOCK) return;
 
         let bx: number, by: number;
         if (this.buildMode) {
@@ -799,11 +827,19 @@ export class BattleScene extends Phaser.Scene {
             by = Math.floor((this.player.y + this.player.height - BLOCK_SIZE) / BLOCK_SIZE) * BLOCK_SIZE;
         }
 
-        if (bx < 0 || bx > LEFT_ZONE_WIDTH - BLOCK_SIZE) return;
+        if (bx < 0 || bx > GAME_WIDTH - BLOCK_SIZE) return;
         if (by < 0 || by > GAME_HEIGHT - BLOCK_SIZE) return;
         for (const b of this.blocks) { if (b.x === bx && b.y === by) return; }
-        this.blocks.push({ x: bx, y: by, element: this.selectedElement, hp: elem.hp, maxHp: elem.hp, side: 'left' });
+        this.blocks.push({
+            x: bx,
+            y: by,
+            element: this.selectedElement,
+            hp: elem.hp,
+            maxHp: elem.hp,
+            side: bx >= RIGHT_ZONE_START ? 'right' : 'left',
+        });
         this.player.inventory[this.selectedElement]--;
+        this.player.mana = Math.max(0, this.player.mana - MANA_COST_BLOCK);
     }
 
     // ─── Damage ─────────────────────────────────────────────
@@ -884,6 +920,7 @@ export class BattleScene extends Phaser.Scene {
     private updateAI(dt: number) {
         if (this.gameOver) return;
         const a = this.ai;
+        this.enforceFacingTowardOpponent();
         a.aiTimer++;
         a.aiShootTimer++;
 
@@ -908,7 +945,7 @@ export class BattleScene extends Phaser.Scene {
             ];
             for (let ang = 15; ang <= 75; ang += 2) {
                 for (const pr of preds) {
-                    const px = Math.max(0, Math.min(LEFT_ZONE_WIDTH - 40, pr.x));
+                    const px = Math.max(0, Math.min(GAME_WIDTH - 40, pr.x));
                     const py = Math.max(100, Math.min(GROUND_Y - 60, pr.y));
                     const aiMuzzle = this.getGunMuzzlePosition(a);
                     const r = this.simShot(aiMuzzle.x, aiMuzzle.y, ang, px, py, playerHitbox.width, playerHitbox.height);
@@ -921,8 +958,10 @@ export class BattleScene extends Phaser.Scene {
                     }
                 }
             }
-            this.shootProjectile(a, bestAngle + (Math.random() - 0.5) * 15, false);
-            a.aiShootTimer = 0;
+            const aiShotFired = this.shootProjectile(a, bestAngle + (Math.random() - 0.5) * 15, false);
+            if (aiShotFired) {
+                a.aiShootTimer = 0;
+            }
         }
 
         if (a.aiTimer > 50) {
@@ -933,9 +972,8 @@ export class BattleScene extends Phaser.Scene {
             else a.velX = 0;
             if (a.onGround && Math.random() < 0.15) a.velY = JUMP_FORCE;
         }
-        if (a.x < RIGHT_ZONE_START + 20) a.velX = MOVE_SPEED * 0.7;
+        if (a.x < 20) a.velX = MOVE_SPEED * 0.7;
         else if (a.x > GAME_WIDTH - 70) a.velX = -MOVE_SPEED * 0.7;
-        a.facingRight = false;
     }
 
     private simShot(sx: number, sy: number, angle: number, tx: number, ty: number, tw: number, th: number) {
@@ -1007,19 +1045,6 @@ export class BattleScene extends Phaser.Scene {
             }
             g.lineStyle(1, 0xa0aec0, 0.5);
             g.strokeRect(p.x, p.y, p.width, p.height);
-        }
-
-        // Gap
-        g.fillStyle(0x060610);
-        g.fillRect(LEFT_ZONE_WIDTH, GROUND_Y, RIGHT_ZONE_START - LEFT_ZONE_WIDTH, GROUND_HEIGHT);
-
-        // Lava spikes
-        const gapWidth = RIGHT_ZONE_START - LEFT_ZONE_WIDTH;
-        const spikeCount = Math.floor(gapWidth / 40);
-        for (let i = 0; i < spikeCount; i++) {
-            g.fillStyle(i % 2 === 0 ? 0xf44336 : 0xff9800);
-            const sx = LEFT_ZONE_WIDTH + i * 40;
-            g.fillTriangle(sx, GAME_HEIGHT, sx + 20, GAME_HEIGHT - 25, sx + 40, GAME_HEIGHT);
         }
     }
 
@@ -1195,10 +1220,20 @@ export class BattleScene extends Phaser.Scene {
         g.fillStyle(0x4caf50); g.fillRect(22, 20, (this.player.health / MAX_HEALTH) * 196, 18);
         g.lineStyle(1, 0xaaaaaa); g.strokeRect(20, 18, 200, 22);
 
+        // Player mana bar
+        g.fillStyle(0x1b2533); g.fillRect(20, 43, 200, 12);
+        g.fillStyle(0x29b6f6); g.fillRect(22, 45, (this.player.mana / MAX_MANA) * 196, 8);
+        g.lineStyle(1, 0x4fc3f7); g.strokeRect(20, 43, 200, 12);
+
         // AI HP bar
         g.fillStyle(0x222222); g.fillRect(GAME_WIDTH - 220, 18, 200, 22);
         g.fillStyle(0xf44336); g.fillRect(GAME_WIDTH - 218, 20, (this.ai.health / MAX_HEALTH) * 196, 18);
         g.lineStyle(1, 0xaaaaaa); g.strokeRect(GAME_WIDTH - 220, 18, 200, 22);
+
+        // AI mana bar
+        g.fillStyle(0x1b2533); g.fillRect(GAME_WIDTH - 220, 43, 200, 12);
+        g.fillStyle(0x29b6f6); g.fillRect(GAME_WIDTH - 218, 45, (this.ai.mana / MAX_MANA) * 196, 8);
+        g.lineStyle(1, 0x4fc3f7); g.strokeRect(GAME_WIDTH - 220, 43, 200, 12);
 
         // Timer bg
         g.fillStyle(0x000000, 0.7); g.fillRect(GAME_WIDTH / 2 - 45, 10, 90, 30);
@@ -1230,9 +1265,11 @@ export class BattleScene extends Phaser.Scene {
         });
 
         // Update text content
-        this.uiTexts.get('playerHp')!.setText(`${this.player.health}`);
+        this.uiTexts.get('playerHp')!.setText(`HP ${Math.round(this.player.health)}`);
+        this.uiTexts.get('playerMana')!.setText(`MANA ${Math.floor(this.player.mana)}/${MAX_MANA}`);
         this.uiTexts.get('playerLabel')!.setText(`LOADOUT: ${this.selectedShotKeys.map((k) => ELEMENTS[k]?.symbol ?? k).join(' / ')}`);
-        this.uiTexts.get('aiHp')!.setText(`${this.ai.health}`);
+        this.uiTexts.get('aiHp')!.setText(`HP ${Math.round(this.ai.health)}`);
+        this.uiTexts.get('aiMana')!.setText(`MANA ${Math.floor(this.ai.mana)}/${MAX_MANA}`);
 
         const mins = Math.floor(this.matchTimer / 60);
         const secs = this.matchTimer % 60;
